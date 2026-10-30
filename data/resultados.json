@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "estudiante_id": 1,
+    "oferta_id": 1,
+    "estudiante": "Lucía Pérez",
+    "oferta": "Analista de datos Jr",
+    "score": 61.7,
+    "competencias_faltantes": [
+      "power bi",
+      "sql"
+    ],
+    "faltantes_obligatorias": [
+      "sql"
+    ],
+    "origen": "calculado con reglas de Python"
+  },
+  {
+    "id": 2,
+    "estudiante_id": 1,
+    "oferta_id": 2,
+    "estudiante": "Lucía Pérez",
+    "oferta": "Desarrollador Backend",
+    "score": 15.0,
+    "competencias_faltantes": [
+      "angular",
+      "docker",
+      "node.js",
+      "sql"
+    ],
+    "faltantes_obligatorias": [
+      "docker",
+      "node.js",
+      "sql"
+    ],
+    "origen": "calculado con reglas de Python"
+  }
+]

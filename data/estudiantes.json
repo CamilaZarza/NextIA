@@ -6,7 +6,7 @@
     "competencias": ["Python", "Git", "Excel"]
   },
     {
-    "id": 1,
+    "id": 2,
     "nombre": "Carlos Gómez",
     "carrera": "Analista de Datos",
     "competencias": ["Angular", "SQL", "Docker"]

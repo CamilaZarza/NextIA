@@ -2,7 +2,7 @@
 def normalizar(competencias: list[str]) -> set[str]:
     return {c.strip().lower() for c in competencias if c.strip()}
 
-
+"""Calcula la compatibilidad entre un estudiante y una oferta de trabajo."""
 def calcular_compatibilidad(estudiante: dict, oferta: dict) -> dict:
     tiene = normalizar(estudiante["competencias"])
     obligatorias = normalizar(oferta["requisitos_obligatorios"])
