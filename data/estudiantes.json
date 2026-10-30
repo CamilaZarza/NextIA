@@ -3,12 +3,30 @@
     "id": 1,
     "nombre": "Lucía Pérez",
     "carrera": "Licenciatura en Tecnologías Digitales",
-    "competencias": ["Python", "Git", "Excel"]
+    "competencias": [
+      "Python",
+      "Git",
+      "Excel"
+    ]
   },
-    {
+  {
     "id": 2,
     "nombre": "Carlos Gómez",
     "carrera": "Analista de Datos",
-    "competencias": ["Angular", "SQL", "Docker"]
+    "competencias": [
+      "Angular",
+      "SQL",
+      "Docker"
+    ]
+  },
+  {
+    "id": 3,
+    "nombre": "Calum Hood",
+    "carrera": "Analista de sistemas",
+    "competencias": [
+      "angular",
+      "GIT",
+      "SQL"
+    ]
   }
 ]

@@ -34,5 +34,111 @@
       "sql"
     ],
     "origen": "calculado con reglas de Python"
+  },
+  {
+    "id": 3,
+    "estudiante_id": 1,
+    "oferta_id": 1,
+    "estudiante": "Lucía Pérez",
+    "oferta": "Analista de datos Jr",
+    "score": 61.7,
+    "competencias_faltantes": [
+      "power bi",
+      "sql"
+    ],
+    "faltantes_obligatorias": [
+      "sql"
+    ],
+    "origen": "calculado con reglas de Python"
+  },
+  {
+    "id": 4,
+    "estudiante_id": 2,
+    "oferta_id": 1,
+    "estudiante": "Carlos Gómez",
+    "oferta": "Analista de datos Jr",
+    "score": 23.3,
+    "competencias_faltantes": [
+      "excel",
+      "git",
+      "power bi",
+      "python"
+    ],
+    "faltantes_obligatorias": [
+      "excel",
+      "python"
+    ],
+    "origen": "calculado con reglas de Python"
+  },
+  {
+    "id": 5,
+    "estudiante_id": 3,
+    "oferta_id": 1,
+    "estudiante": "Calum Hood",
+    "oferta": "Analista de datos Jr",
+    "score": 38.3,
+    "competencias_faltantes": [
+      "excel",
+      "power bi",
+      "python"
+    ],
+    "faltantes_obligatorias": [
+      "excel",
+      "python"
+    ],
+    "origen": "calculado con reglas de Python"
+  },
+  {
+    "id": 6,
+    "estudiante_id": 3,
+    "oferta_id": 2,
+    "estudiante": "Calum Hood",
+    "oferta": "Desarrollador Backend",
+    "score": 53.3,
+    "competencias_faltantes": [
+      "docker",
+      "node.js"
+    ],
+    "faltantes_obligatorias": [
+      "docker",
+      "node.js"
+    ],
+    "origen": "calculado con reglas de Python"
+  },
+  {
+    "id": 7,
+    "estudiante_id": 2,
+    "oferta_id": 2,
+    "estudiante": "Carlos Gómez",
+    "oferta": "Desarrollador Backend",
+    "score": 61.7,
+    "competencias_faltantes": [
+      "git",
+      "node.js"
+    ],
+    "faltantes_obligatorias": [
+      "node.js"
+    ],
+    "origen": "calculado con reglas de Python"
+  },
+  {
+    "id": 8,
+    "estudiante_id": 1,
+    "oferta_id": 2,
+    "estudiante": "Lucía Pérez",
+    "oferta": "Desarrollador Backend",
+    "score": 15.0,
+    "competencias_faltantes": [
+      "angular",
+      "docker",
+      "node.js",
+      "sql"
+    ],
+    "faltantes_obligatorias": [
+      "docker",
+      "node.js",
+      "sql"
+    ],
+    "origen": "calculado con reglas de Python"
   }
 ]
