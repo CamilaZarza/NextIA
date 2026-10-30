@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "nombre": "Lucía Pérez",
+    "carrera": "Licenciatura en Tecnologías Digitales",
+    "competencias": ["Python", "Git", "Excel"]
+  },
+    {
+    "id": 1,
+    "nombre": "Carlos Gómez",
+    "carrera": "Analista de Datos",
+    "competencias": ["Angular", "SQL", "Docker"]
+  }
+]

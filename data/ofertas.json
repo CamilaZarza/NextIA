@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "titulo": "Analista de datos Jr",
+    "empresa": "Globant",
+    "requisitos_obligatorios": ["python", "sql", "excel"],
+    "requisitos_deseables": ["power bi", "git"]
+  }
+  ,{
+    "id": 2,
+    "titulo": "Desarrollador Backend",
+    "empresa": "OpenAI",
+    "requisitos_obligatorios": ["node.js", "sql", "docker"],
+    "requisitos_deseables": ["angular", "git"]
+  }
+]
