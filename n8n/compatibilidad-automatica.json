@@ -1,0 +1,102 @@
+{
+  "name": "Compatibilidad  automatica",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "calcular-compatibilidad",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "fc997f91-71f3-4ebf-8b6a-cf78fbd4c14f",
+      "name": "Webhook",
+      "webhookId": "56cbd9fa-446f-43a8-b4fc-1aa4265698b4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8000/compatibilidad",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "estudiante_id",
+              "value": "={{ $json.body.estudiante_id }}"
+            },
+            {
+              "name": "oferta_id",
+              "value": "={{ $json.body.oferta_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        208,
+        0
+      ],
+      "id": "9b8907be-65a5-4112-aa75-00d146c71ebe",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  mensaje: \"Compatibilidad calculada correctamente\",\n  resultado: $json\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        432,
+        0
+      ],
+      "id": "3c8afcfc-95cd-4bde-8dd7-f3b9b1fc4442",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c97148df-3eb9-4b2f-9512-cf8475eff999",
+  "meta": {
+    "instanceId": "c1bd0c540af960dee629a669d9122475179cb70658eef9c1f4e07b0e526867d3"
+  },
+  "nodeGroups": [],
+  "id": "HepbKs4VOfNFCXA2",
+  "tags": []
+}

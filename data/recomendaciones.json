@@ -1,0 +1,9 @@
+[
+  {
+    "id": 1,
+    "resultado_id": 1,
+    "texto": "Practicar SQL con ejercicios básicos",
+    "modelo": "gemini",
+    "origen": "generado por IA (requiere revisión humana)"
+  }
+]

@@ -18,3 +18,8 @@ class OfertaEntrada(BaseModel):
 class CompatibilidadEntrada(BaseModel):
     estudiante_id: int
     oferta_id: int
+
+class RecomendacionEntrada(BaseModel):
+    resultado_id: int
+    texto: str = Field(min_length=5)
+    modelo: str = "gemini"

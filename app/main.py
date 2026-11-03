@@ -1,7 +1,12 @@
 from fastapi import FastAPI, HTTPException
 
 from app import almacenamiento as db
-from app.modelos import CompatibilidadEntrada, EstudianteEntrada, OfertaEntrada
+from app.modelos import (
+    CompatibilidadEntrada,
+    EstudianteEntrada,
+    OfertaEntrada,
+    RecomendacionEntrada,
+)
 from app.scoring import calcular_compatibilidad
 
 app = FastAPI(title="Nextia API")
@@ -90,3 +95,30 @@ def listar_resultados(estudiante_id: int | None = None) -> list[dict]:
     if estudiante_id is not None:
         resultados = [r for r in resultados if r["estudiante_id"] == estudiante_id]
     return resultados
+
+# ---------- Recomendaciones (las genera la IA vía n8n) ----------
+@app.get("/resultados/{resultado_id}")
+def obtener_resultado(resultado_id: int) -> dict:
+    return buscar_por_id("resultados", resultado_id, "Resultado")
+
+
+@app.post("/recomendaciones", status_code=201)
+def guardar_recomendacion(datos: RecomendacionEntrada) -> dict:
+    buscar_por_id("resultados", datos.resultado_id, "Resultado")  # valida que exista
+    recomendaciones = db.leer("recomendaciones")
+    nueva = {
+        "id": db.siguiente_id(recomendaciones),
+        **datos.model_dump(),
+        "origen": "generado por IA (requiere revisión humana)",
+    }
+    recomendaciones.append(nueva)
+    db.guardar("recomendaciones", recomendaciones)
+    return nueva
+
+
+@app.get("/recomendaciones")
+def listar_recomendaciones(resultado_id: int | None = None) -> list[dict]:
+    recomendaciones = db.leer("recomendaciones")
+    if resultado_id is not None:
+        recomendaciones = [r for r in recomendaciones if r["resultado_id"] == resultado_id]
+    return recomendaciones
