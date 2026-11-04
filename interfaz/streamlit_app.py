@@ -2,6 +2,7 @@ import requests
 import streamlit as st
 
 API_URL = "http://127.0.0.1:8000"
+N8N_URL = "http://127.0.0.1:5678/webhook"
 
 st.set_page_config(page_title="NextIA", page_icon="🎯", layout="wide")
 
@@ -24,6 +25,32 @@ def llamar_api(metodo: str, ruta: str, **kwargs):
             detalle = "; ".join(f"{e['loc'][-1]}: {e['msg']}" for e in detalle)
         return None, f"Error {respuesta.status_code}: {detalle}"
     return respuesta.json(), None
+
+
+def llamar_webhook(ruta: str, datos: dict | None = None, **kwargs):
+    """Llama a un webhook de n8n. Devuelve (datos, error)."""
+    if datos is None:
+        datos = kwargs.get("json", {})
+    try:
+        respuesta = requests.post(
+            f"{N8N_URL}/{ruta}",
+            json=datos,
+            timeout=30,
+        )
+    except requests.exceptions.ConnectionError:
+        return None, "No se pudo conectar con n8n. Verificá que esté publicado y activo."
+    except requests.exceptions.Timeout:
+        return None, "n8n tardó demasiado en responder."
+
+    try:
+        contenido = respuesta.json()
+    except ValueError:
+        contenido = {"error": respuesta.text}
+
+    if respuesta.status_code >= 400:
+        detalle = contenido.get("detail") or contenido.get("error") or contenido.get("message")
+        return None, f"Error {respuesta.status_code}: {detalle or 'Error desconocido'}"
+    return contenido, None
 
 
 def a_lista(texto: str) -> list[str]:
@@ -50,15 +77,16 @@ with tab_est:
         enviar = st.form_submit_button("Guardar")
 
     if enviar:
-        datos, error = llamar_api(
-            "POST",
-            "/estudiantes",
+        datos, error = llamar_webhook(
+            "registrar-estudiante",
             json={"nombre": nombre, "carrera": carrera, "competencias": a_lista(competencias)},
         )
         if error:
             st.error(error)
         else:
-            st.success(f"Estudiante creado con id {datos['id']}")
+            estudiante = datos.get("estudiante", datos)
+            st.success(f"Estudiante creado con id {estudiante['id']}")
+            st.caption("Proceso automático: n8n → FastAPI → persistencia JSON")
 
     st.subheader("Estudiantes registrados")
     estudiantes, error = llamar_api("GET", "/estudiantes")
@@ -106,9 +134,8 @@ with tab_ofe:
         enviar_oferta = st.form_submit_button("Guardar")
 
     if enviar_oferta:
-        datos, error = llamar_api(
-            "POST",
-            "/ofertas",
+        datos, error = llamar_webhook(
+            "registrar-oferta",
             json={
                 "titulo": titulo,
                 "empresa": empresa,
@@ -119,7 +146,9 @@ with tab_ofe:
         if error:
             st.error(error)
         else:
-            st.success(f"Oferta creada con id {datos['id']}")
+            oferta = datos.get("oferta", datos)
+            st.success(f"Oferta creada con id {oferta['id']}")
+            st.caption("Proceso automático: n8n → FastAPI → persistencia JSON")
 
     st.subheader("Ofertas registradas")
     ofertas, error = llamar_api("GET", "/ofertas")
@@ -154,21 +183,23 @@ with tab_comp:
             key="comp_oferta",
         )
         if st.button("Calcular compatibilidad"):
-            res, error = llamar_api(
-                "POST",
-                "/compatibilidad",
+            res, error = llamar_webhook(
+                "calcular-compatibilidad",
                 json={"estudiante_id": est["id"], "oferta_id": ofe["id"]},
             )
             if error:
                 st.error(error)
             else:
-                st.metric("Score de compatibilidad", f"{res['score']} / 100")
-                st.progress(int(res["score"]))
-                if res["competencias_faltantes"]:
-                    st.warning("Competencias faltantes: " + ", ".join(res["competencias_faltantes"]))
+                resultado = res.get("resultado", res)
+                st.session_state["ultimo_resultado"] = resultado
+                st.metric("Score de compatibilidad", f"{resultado['score']} / 100")
+                st.progress(int(resultado["score"]))
+                if resultado["competencias_faltantes"]:
+                    st.warning("Competencias faltantes: " + ", ".join(resultado["competencias_faltantes"]))
                 else:
                     st.success("Cumple todos los requisitos")
-                st.caption(f"Origen del resultado: {res['origen']}")
+                st.caption(f"Origen del resultado: {resultado['origen']}")
+                st.caption("Cálculo automático: n8n → FastAPI → reglas Python")
 
 # ---------------- RESULTADOS ----------------
 with tab_res:
@@ -178,5 +209,44 @@ with tab_res:
         st.error(error)
     elif resultados:
         st.dataframe(resultados, use_container_width=True)
+
+        resultado_elegido = st.selectbox(
+            "Resultado para generar recomendación",
+            resultados,
+            format_func=lambda r: (
+                f"#{r['id']} - {r['estudiante']} / {r['oferta']} ({r['score']} puntos)"
+            ),
+            key="resultado_ia",
+        )
+
+        if st.button("Generar recomendación con IA"):
+            datos, error_ia = llamar_webhook(
+                "generar-recomendacion",
+                {"resultado_id": resultado_elegido["id"]},
+            )
+            if error_ia:
+                st.error(error_ia)
+            else:
+                st.success("Recomendación generada mediante n8n + Google Gemini")
+                recomendacion = datos.get("resultado", datos)
+                if isinstance(recomendacion, dict):
+                    texto = recomendacion.get("texto", "")
+                else:
+                    texto = str(recomendacion)
+                if texto and texto != "={{ $json }}":
+                    st.write(texto)
+                else:
+                    recomendaciones, error_rec = llamar_api(
+                        "GET",
+                        "/recomendaciones",
+                        params={"resultado_id": resultado_elegido["id"]},
+                    )
+                    if error_rec:
+                        st.error(error_rec)
+                    elif recomendaciones:
+                        st.write(recomendaciones[-1]["texto"])
+                st.caption(
+                    "Origen: Google Gemini vía n8n · Recomendación automatizada: requiere revisión humana."
+                )
     else:
         st.info("Todavía no se calculó ninguna compatibilidad.")

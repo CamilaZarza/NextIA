@@ -163,5 +163,53 @@
       "sql"
     ],
     "origen": "calculado con reglas de Python"
+  },
+  {
+    "id": 11,
+    "estudiante_id": 1,
+    "oferta_id": 1,
+    "estudiante": "Lucía Pérez",
+    "oferta": "Analista de datos Jr",
+    "score": 61.7,
+    "competencias_faltantes": [
+      "power bi",
+      "sql"
+    ],
+    "faltantes_obligatorias": [
+      "sql"
+    ],
+    "origen": "calculado con reglas de Python"
+  },
+  {
+    "id": 12,
+    "estudiante_id": 1,
+    "oferta_id": 1,
+    "estudiante": "Lucía Pérez",
+    "oferta": "Analista de datos Jr",
+    "score": 61.7,
+    "competencias_faltantes": [
+      "power bi",
+      "sql"
+    ],
+    "faltantes_obligatorias": [
+      "sql"
+    ],
+    "origen": "calculado con reglas de Python"
+  },
+  {
+    "id": 13,
+    "estudiante_id": 1,
+    "oferta_id": 3,
+    "estudiante": "Lucía Pérez",
+    "oferta": "Desarrollador Junior",
+    "score": 50.0,
+    "competencias_faltantes": [
+      "docker",
+      "sql"
+    ],
+    "faltantes_obligatorias": [
+      "sql"
+    ],
+    "origen": "calculado con reglas de Python"
   }
 ]

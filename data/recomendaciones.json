@@ -19,5 +19,33 @@
     "texto": "Con base en el análisis del Resultado ID 9, se obtuvo un score de compatibilidad de 61.7 sobre 100. Debido a este puntaje moderado, se sugiere evaluar cuidadosamente la postulación según los requerimientos específicos del puesto.\n\nLas competencias faltantes identificadas son Power BI y SQL. Para mejorar el perfil en estas áreas, se recomienda tomar cursos especializados y realizar proyectos prácticos que permitan demostrar dominio en ambas herramientas.\n\nRecomendación automatizada: requiere revisión humana.",
     "modelo": "gemini",
     "origen": "generado por IA (requiere revisión humana)"
+  },
+  {
+    "id": 4,
+    "resultado_id": 11,
+    "texto": "Para el Resultado ID 11, se ha obtenido un score de compatibilidad de 61.7 sobre 100. Debido a este puntaje moderado, se sugiere evaluar cuidadosamente la postulación, considerando que existen brechas técnicas específicas respecto a los requerimientos del puesto.\n\nLas competencias faltantes identificadas son Power BI y SQL. Para mejorar estas áreas, se recomienda tomar cursos especializados en ambas herramientas y desarrollar proyectos prácticos que permitan demostrar dominio en análisis y consulta de datos.\n\nRecomendación automatizada: requiere revisión humana.",
+    "modelo": "gemini",
+    "origen": "generado por IA (requiere revisión humana)"
+  },
+  {
+    "id": 5,
+    "resultado_id": 11,
+    "texto": "Con base en el análisis del Resultado ID 11, se obtuvo un score de compatibilidad de 61.7 sobre 100. Este porcentaje indica un nivel moderado de adecuación para el puesto.\n\nAnte este resultado, no se recomienda una postulación inmediata. Es preferible fortalecer el perfil antes de enviar la candidatura.\n\nPara mejorar la compatibilidad, se deben desarrollar de forma prioritaria las competencias faltantes: Power BI y SQL. Se sugiere tomar cursos específicos y realizar proyectos prácticos que demuestren dominio en estas herramientas.\n\nRecomendación automatizada: requiere revisión humana.",
+    "modelo": "gemini",
+    "origen": "generado por IA (requiere revisión humana)"
+  },
+  {
+    "id": 6,
+    "resultado_id": 6,
+    "texto": "Con un score de compatibilidad de 38.3 sobre 100 para el Resultado ID 6, se desaconseja la postulación en las condiciones actuales, ya que el perfil presenta una baja coincidencia con los requisitos solicitados para el puesto.\n\nPara mejorar la competitividad del perfil, se deben tomar acciones concretas enfocadas en desarrollar las competencias faltantes, las cuales son: excel, power bi y python. Se recomienda adquirir formación técnica específica en estas tres áreas antes de volver a postularse.\n\nRecomendación automatizada: requiere revisión humana.",
+    "modelo": "gemini",
+    "origen": "generado por IA (requiere revisión humana)"
+  },
+  {
+    "id": 7,
+    "resultado_id": 13,
+    "texto": "Con base en el análisis del Resultado ID 13, se obtuvo un score de compatibilidad de 50 sobre 100. Debido a este puntaje moderado, no se recomienda postularse de manera inmediata sin antes fortalecer el perfil en las áreas requeridas.\n\nLas competencias faltantes identificadas son Docker y SQL. Para mejorar estas habilidades, se sugiere tomar cursos especializados en ambas tecnologías y desarrollar proyectos prácticos que permitan aplicar estos conocimientos de forma demostrable.\n\nRecomendación automatizada: requiere revisión humana.",
+    "modelo": "gemini",
+    "origen": "generado por IA (requiere revisión humana)"
   }
 ]
