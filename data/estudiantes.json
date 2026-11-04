@@ -28,5 +28,25 @@
       "GIT",
       "SQL"
     ]
+  },
+  {
+    "id": 4,
+    "nombre": "Ana Lopez",
+    "carrera": "Analista de Sistemas",
+    "competencias": [
+      "python",
+      "sql",
+      "git"
+    ]
+  },
+  {
+    "id": 5,
+    "nombre": "Ana Lopez",
+    "carrera": "Analista de Sistemas",
+    "competencias": [
+      "python",
+      "sql",
+      "git"
+    ]
   }
 ]

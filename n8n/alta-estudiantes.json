@@ -1,0 +1,159 @@
+{
+  "name": "Alta automatizada de estudiantes",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "registrar-estudiante",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8d104d8b-dda4-4f9b-a3b9-4fc0f2ac9ba7",
+      "name": "Webhook",
+      "webhookId": "c170ec36-d566-4390-81bc-10350cb87dcb"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "5495a164-b949-45a4-a3c3-423bcbd280f8",
+              "leftValue": "={{ Boolean($json.body?.nombre && $json.body?.carrera && $json.body?.competencias?.length > 0) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        224,
+        0
+      ],
+      "id": "78db6dd1-2fc9-4c11-ac2f-dea17ae8fa2d",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8000/estudiantes",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  \"nombre\": $json.body.nombre,\n  \"carrera\": $json.body.carrera,\n  \"competencias\": $json.body.competencias\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        448,
+        -96
+      ],
+      "id": "a90fa73d-9108-4bb1-8a08-763189a89913",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"mensaje\": \"Estudiante registrado correctamente\",\n  \"estudiante\": \"={{ $json }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        672,
+        -96
+      ],
+      "id": "986f220b-6439-4f43-a7d7-ad73e4dc91b2",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"error\": \"Debes enviar nombre, carrera y competencias\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        448,
+        96
+      ],
+      "id": "278fe9e5-82fa-44c8-90ce-8f0f9c60833c",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "59d780fb-ab7c-4b0a-92fa-0c9eb98191d7",
+  "meta": {
+    "instanceId": "c1bd0c540af960dee629a669d9122475179cb70658eef9c1f4e07b0e526867d3"
+  },
+  "nodeGroups": [],
+  "id": "HCmzg8gUCTINY8PI",
+  "tags": []
+}
