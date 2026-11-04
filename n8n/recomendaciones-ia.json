@@ -21,7 +21,9 @@
     {
       "parameters": {
         "url": "=http://host.docker.internal:8000/resultados/{{ $json.body.resultado_id }}",
-        "options": {}
+        "options": {
+          "neverError": true
+        }
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
@@ -136,6 +138,23 @@
       ],
       "id": "f13b7608-e9b6-4351-b73a-9906337403c5",
       "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"error\": \"El resultado solicitado no existe\"\n}",
+        "options": {
+          "responseCode": 404
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        48,
+        64
+      ],
+      "id": "9cc6871e-3f14-4e87-9e55-65e4fa2e5e2f",
+      "name": "Resultado no encontrado"
     }
   ],
   "pinData": {},
@@ -167,6 +186,13 @@
         [
           {
             "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resultado no encontrado",
             "type": "main",
             "index": 0
           }
@@ -207,7 +233,7 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate"

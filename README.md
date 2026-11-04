@@ -43,11 +43,13 @@ El proyecto incluye cuatro workflows exportados o disponibles en la carpeta `n8n
 | Workflow | Archivo | Responsabilidad | Decisión |
 |---|---|---|---|
 | Alta automatizada de estudiantes | `n8n/alta-estudiantes.json` | Recibe los datos de un estudiante y los registra mediante FastAPI. | Valida que nombre, carrera y competencias estén presentes. |
-| Compatibilidad automática | `n8n/compatibilidad-automatica.json` | Recibe un estudiante y una oferta, calcula su compatibilidad y guarda el resultado. | — |
+| Compatibilidad automática | `n8n/compatibilidad-automatica.json` | Recibe un estudiante y una oferta, calcula su compatibilidad y guarda el resultado. | Valida que ambos IDs estén presentes. |
 | Recomendaciones con IA | `n8n/recomendaciones-ia.json` | Obtiene un resultado, consulta Gemini y guarda una recomendación en la API. | Verifica que el resultado solicitado exista. |
 | Alta automatizada de ofertas | `n8n/alta-ofertas.json` | Recibe los datos de una oferta y los registra mediante FastAPI. | Valida que título, empresa y requisitos obligatorios estén presentes. |
 
 Todos los workflows pueden comunicarse con FastAPI mediante `http://host.docker.internal:8000`, que permite al contenedor de n8n acceder al servicio ejecutado en el equipo anfitrión.
+
+Los workflows incluidos tienen respuestas HTTP 400 o 404 para solicitudes inválidas y deben exportarse/importarse nuevamente si se realizan cambios posteriores en n8n.
 
 ### 3.1 Iniciar n8n
 
@@ -71,7 +73,7 @@ Para importar los workflows:
 4. Guardar y activar el workflow correspondiente.
 5. Configurar las credenciales necesarias para el workflow de recomendaciones.
 
-Los archivos exportados mantienen `active: false`. Es necesario activar cada workflow desde la interfaz antes de utilizar su URL de producción.
+Los archivos exportados están configurados como activos (`active: true`). Igualmente, deben activarse desde la interfaz de n8n si esta muestra el workflow como inactivo después de importarlo o reiniciar el entorno.
 
 ### 3.2 Alta automatizada de estudiantes
 

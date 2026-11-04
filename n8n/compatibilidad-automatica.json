@@ -48,6 +48,40 @@
     },
     {
       "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "validar-ids-compatibilidad",
+              "leftValue": "={{ Boolean($json.body?.estudiante_id && $json.body?.oferta_id) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "02d4e8b4-f3c3-4f7f-9829-c0b5f8d98b73",
+      "name": "Validar IDs"
+    },
+    {
+      "parameters": {
         "respondWith": "json",
         "responseBody": "={{ {\n  mensaje: \"Compatibilidad calculada correctamente\",\n  resultado: $json\n} }}",
         "options": {}
@@ -60,6 +94,23 @@
       ],
       "id": "3c8afcfc-95cd-4bde-8dd7-f3b9b1fc4442",
       "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"error\": \"Debes enviar estudiante_id y oferta_id\"\n}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        432,
+        192
+      ],
+      "id": "c64a8d7b-85d0-47eb-8615-0b3ae093b2dd",
+      "name": "Respond Error"
     }
   ],
   "pinData": {},
@@ -68,7 +119,25 @@
       "main": [
         [
           {
+            "node": "Validar IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar IDs": {
+      "main": [
+        [
+          {
             "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Error",
             "type": "main",
             "index": 0
           }
@@ -87,7 +156,7 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate"

@@ -89,7 +89,9 @@
       "parameters": {
         "respondWith": "json",
         "responseBody": "{\n  \"error\": \"Debes enviar nombre, carrera y competencias\"\n}",
-        "options": {}
+        "options": {
+          "responseCode": 400
+        }
       },
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
@@ -144,7 +146,7 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate"
