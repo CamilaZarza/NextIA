@@ -20,6 +20,8 @@ Nextia permite registrar perfiles de estudiantes (con sus competencias) y oferta
 | API | FastAPI | Valida datos, aplica la lógica de negocio, guarda y consulta información. |
 | Lógica | Python | Cálculo del scoring y detección de competencias faltantes. |
 | Persistencia | Archivos JSON | Almacenamiento de estudiantes, ofertas, resultados y recomendaciones. |
+| Automatización | n8n | Webhooks, validaciones, llamadas a FastAPI y generación de recomendaciones con IA. |
+| IA | Google Gemini | Genera recomendaciones a partir de los resultados calculados por Nextia. |
 
 ---
 
@@ -30,6 +32,210 @@ Streamlit  ──(JSON / HTTP)──▶  FastAPI  ──▶  scoring.py (reglas)
  (interfaz)                       │
                                   ▼
                            data/*.json (persistencia)
+
+n8n ──(webhook / HTTP)──▶ FastAPI ──▶ data/*.json
+```
+
+## 3. Workflows de n8n
+
+El proyecto incluye cuatro workflows exportados o disponibles en la carpeta `n8n/`:
+
+| Workflow | Archivo | Responsabilidad | Decisión |
+|---|---|---|---|
+| Alta automatizada de estudiantes | `n8n/alta-estudiantes.json` | Recibe los datos de un estudiante y los registra mediante FastAPI. | Valida que nombre, carrera y competencias estén presentes. |
+| Compatibilidad automática | `n8n/compatibilidad-automatica.json` | Recibe un estudiante y una oferta, calcula su compatibilidad y guarda el resultado. | — |
+| Recomendaciones con IA | `n8n/recomendaciones-ia.json` | Obtiene un resultado, consulta Gemini y guarda una recomendación en la API. | Verifica que el resultado solicitado exista. |
+| Alta automatizada de ofertas | `n8n/alta-ofertas.json` | Recibe los datos de una oferta y los registra mediante FastAPI. | Valida que título, empresa y requisitos obligatorios estén presentes. |
+
+Todos los workflows pueden comunicarse con FastAPI mediante `http://host.docker.internal:8000`, que permite al contenedor de n8n acceder al servicio ejecutado en el equipo anfitrión.
+
+### 3.1 Iniciar n8n
+
+Desde la raíz del proyecto:
+
+```powershell
+docker compose -f n8n/compose.yaml up -d
+```
+
+n8n queda disponible en:
+
+```text
+http://localhost:5678
+```
+
+Para importar los workflows:
+
+1. Abrir n8n en el navegador.
+2. Seleccionar **Workflows > Import from File**.
+3. Importar cada archivo de la carpeta `n8n/`.
+4. Guardar y activar el workflow correspondiente.
+5. Configurar las credenciales necesarias para el workflow de recomendaciones.
+
+Los archivos exportados mantienen `active: false`. Es necesario activar cada workflow desde la interfaz antes de utilizar su URL de producción.
+
+### 3.2 Alta automatizada de estudiantes
+
+Webhook configurado como:
+
+```text
+POST /webhook/registrar-estudiante
+```
+
+Ejemplo de solicitud:
+
+```json
+{
+  "nombre": "Ana López",
+  "carrera": "Analista de Sistemas",
+  "competencias": ["python", "sql", "git"]
+}
+```
+
+El nodo `IF` rechaza solicitudes incompletas. Si los datos son válidos, n8n llama a `POST /estudiantes` y devuelve al cliente el estudiante creado por FastAPI.
+
+Prueba desde PowerShell:
+
+```powershell
+$body = @{
+  nombre = "Ana López"
+  carrera = "Analista de Sistemas"
+  competencias = @("python", "sql", "git")
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+  -Uri "http://localhost:5678/webhook/registrar-estudiante" `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body $body
+```
+
+### 3.3 Compatibilidad automática
+
+Webhook configurado como:
+
+```text
+POST /webhook/calcular-compatibilidad
+```
+
+Ejemplo de solicitud:
+
+```json
+{
+  "estudiante_id": 1,
+  "oferta_id": 1
+}
+```
+
+El workflow llama a `POST /compatibilidad`. FastAPI calcula el score, identifica las competencias faltantes y guarda el resultado.
+
+Prueba desde PowerShell:
+
+```powershell
+$body = @{
+  estudiante_id = 1
+  oferta_id = 1
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+  -Uri "http://localhost:5678/webhook/calcular-compatibilidad" `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body $body
+```
+
+### 3.4 Recomendaciones con IA
+
+Webhook configurado como:
+
+```text
+POST /webhook/generar-recomendacion
+```
+
+Ejemplo de solicitud:
+
+```json
+{
+  "resultado_id": 9
+}
+```
+
+El workflow obtiene el resultado mediante `GET /resultados/{id}`. Un nodo `IF` verifica que el resultado exista; en ese caso, la rama verdadera envía el score y las competencias faltantes a Google Gemini mediante un `Basic LLM Chain`. La respuesta generada se guarda con `POST /recomendaciones` y `modelo: "gemini"`.
+
+Prueba desde PowerShell:
+
+```powershell
+$body = @{
+  resultado_id = 9
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+  -Uri "http://localhost:5678/webhook/generar-recomendacion" `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body $body
+```
+
+La recomendación se identifica en la API como `generado por IA (requiere revisión humana)`. El proyecto no guarda la API key dentro de los archivos exportados; debe configurarse como credencial privada en n8n.
+
+### 3.5 Alta automatizada de ofertas
+
+Webhook configurado como:
+
+```text
+POST /webhook/registrar-oferta
+```
+
+Ejemplo de solicitud:
+
+```json
+{
+  "titulo": "Desarrollador Junior",
+  "empresa": "Empresa NextIA",
+  "requisitos_obligatorios": ["python", "sql"],
+  "requisitos_deseables": ["git", "docker"]
+}
+```
+
+El flujo utiliza los siguientes nodos:
+
+```text
+Webhook
+  → IF
+  ├─ True → HTTP Request: POST /ofertas → Respond to Webhook
+  └─ False → Respond to Webhook con error 400
+```
+
+El nodo `IF` verifica que `titulo`, `empresa` y `requisitos_obligatorios` estén presentes y que la lista de requisitos obligatorios no esté vacía.
+
+En la rama verdadera, n8n llama a `POST /ofertas` mediante:
+
+```text
+http://host.docker.internal:8000/ofertas
+```
+
+Prueba desde PowerShell:
+
+```powershell
+$body = @{
+  titulo = "Desarrollador Junior"
+  empresa = "Empresa NextIA"
+  requisitos_obligatorios = @("python", "sql")
+  requisitos_deseables = @("git", "docker")
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+  -Uri "http://localhost:5678/webhook/registrar-oferta" `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body $body
+```
+
+Si la solicitud tiene datos incompletos, el workflow responde con estado `400` y el mensaje:
+
+```json
+{
+  "error": "Debes enviar titulo, empresa y al menos un requisito obligatorio"
+}
 ```
 
 ## 4. Requisitos

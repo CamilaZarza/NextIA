@@ -1,0 +1,223 @@
+{
+  "name": "Recomendaciones IA",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generar-recomendacion",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        -544,
+        -144
+      ],
+      "id": "5f97d1e0-e340-4174-8722-67f51bbd2b5a",
+      "name": "Webhook",
+      "webhookId": "6c4dd0dc-2c8f-4771-a0ba-0c4bad1c969a"
+    },
+    {
+      "parameters": {
+        "url": "=http://host.docker.internal:8000/resultados/{{ $json.body.resultado_id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -352,
+        -144
+      ],
+      "id": "355d4625-578a-40ca-931e-6243a6631e88",
+      "name": "Obtener resultado"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "f1d89c40-6350-4240-bf0b-d72311dde954",
+              "leftValue": "={{$json.id}}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        -176,
+        -144
+      ],
+      "id": "95dc72ab-7d7d-4687-9676-264036d8f72a",
+      "name": "Validar resultado"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Genera una recomendación profesional breve en español usando únicamente estos datos:\n\nResultado ID: {{ $json.id }}\nScore de compatibilidad: {{ $json.score }} sobre 100\nCompetencias faltantes: {{ Array.isArray($json.competencias_faltantes) ? $json.competencias_faltantes.join(\", \") : \"Ninguna\" }}\n\nLa respuesta debe:\n- Tener entre 2 y 4 párrafos.\n- Indicar si conviene postularse.\n- Sugerir acciones concretas para mejorar las competencias faltantes.\n- No inventar información adicional.\n- Terminar indicando: \"Recomendación automatizada: requiere revisión humana.\"",
+        "messages": {
+          "messageValues": []
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        48,
+        -160
+      ],
+      "id": "b4430217-31cd-4619-a872-ef0778f07609",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        48,
+        16
+      ],
+      "id": "7e37b4ec-ebde-4cf8-9cdf-944fb0750109",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QJe1hD1zTgG7Kn6v",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8000/recomendaciones",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  \"resultado_id\": $(\"Obtener resultado\").item.json.id,\n  \"texto\": $json.text,\n  \"modelo\": \"gemini\"\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        336,
+        -160
+      ],
+      "id": "36c62fe3-4e7a-440f-bd26-30279451b3c1",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"mensaje\": \"Recomendación generada y guardada por IA\",\n  \"resultado\": \"={{ $json }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        544,
+        -160
+      ],
+      "id": "f13b7608-e9b6-4351-b73a-9906337403c5",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Obtener resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener resultado": {
+      "main": [
+        [
+          {
+            "node": "Validar resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar resultado": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "94b0d778-0865-407d-9567-ad3d117beb82",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c1bd0c540af960dee629a669d9122475179cb70658eef9c1f4e07b0e526867d3"
+  },
+  "nodeGroups": [],
+  "id": "JMllpnvXL4wSFUfZ",
+  "tags": []
+}

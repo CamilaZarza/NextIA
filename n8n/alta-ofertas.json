@@ -1,0 +1,159 @@
+{
+  "name": "alta-ofertas",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "registrar-oferta",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "217a4e63-0572-40a0-a140-30e0a97eb350",
+      "name": "Webhook",
+      "webhookId": "9d9d9128-a1be-46fc-a32b-781aa90bbba5"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "2e231c78-ef08-43b5-8d18-35117db72456",
+              "leftValue": "={{ Boolean($json.body?.titulo && $json.body?.empresa && $json.body?.requisitos_obligatorios?.length > 0) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        224,
+        0
+      ],
+      "id": "9f0fbd1e-fdd2-4012-b90c-5b95225c750b",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8000/ofertas",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  \"titulo\": $json.body.titulo,\n  \"empresa\": $json.body.empresa,\n  \"requisitos_obligatorios\": $json.body.requisitos_obligatorios,\n  \"requisitos_deseables\": $json.body.requisitos_deseables || []\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        448,
+        -96
+      ],
+      "id": "712c8877-19cd-454b-b2e0-de003ef05e65",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  mensaje: \"Oferta registrada correctamente\",\n  oferta: $json\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        672,
+        -96
+      ],
+      "id": "534023e3-868c-4bd5-ba12-33c8586d5bcc",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"error\": \"Debes enviar titulo, empresa y al menos un requisito obligatorio\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        448,
+        96
+      ],
+      "id": "c87596cc-96b5-40e7-93fe-7672e57bdf57",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "44140e81-2980-4733-bb72-d2bdad6436e0",
+  "meta": {
+    "instanceId": "c1bd0c540af960dee629a669d9122475179cb70658eef9c1f4e07b0e526867d3"
+  },
+  "nodeGroups": [],
+  "id": "7swPQcIKN7yrk8LH",
+  "tags": []
+}

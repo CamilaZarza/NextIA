@@ -5,5 +5,19 @@
     "texto": "Practicar SQL con ejercicios básicos",
     "modelo": "gemini",
     "origen": "generado por IA (requiere revisión humana)"
+  },
+  {
+    "id": 2,
+    "resultado_id": 9,
+    "texto": "Con base en el análisis del Resultado ID 9, se obtuvo un score de compatibilidad de 61.7 sobre 100. Debido a este puntaje moderado, se sugiere evaluar cuidadosamente la postulación según las exigencias específicas del puesto.\n\nPara mejorar el perfil y cubrir las competencias faltantes, se deben realizar acciones concretas enfocadas en aprender Power BI y SQL.\n\nRecomendación automatizada: requiere revisión humana.",
+    "modelo": "gemini",
+    "origen": "generado por IA (requiere revisión humana)"
+  },
+  {
+    "id": 3,
+    "resultado_id": 9,
+    "texto": "Con base en el análisis del Resultado ID 9, se obtuvo un score de compatibilidad de 61.7 sobre 100. Debido a este puntaje moderado, se sugiere evaluar cuidadosamente la postulación según los requerimientos específicos del puesto.\n\nLas competencias faltantes identificadas son Power BI y SQL. Para mejorar el perfil en estas áreas, se recomienda tomar cursos especializados y realizar proyectos prácticos que permitan demostrar dominio en ambas herramientas.\n\nRecomendación automatizada: requiere revisión humana.",
+    "modelo": "gemini",
+    "origen": "generado por IA (requiere revisión humana)"
   }
 ]
