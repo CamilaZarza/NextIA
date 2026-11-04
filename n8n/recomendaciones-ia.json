@@ -20,10 +20,8 @@
     },
     {
       "parameters": {
-        "url": "=http://host.docker.internal:8000/resultados/{{ $json.body.resultado_id }}",
-        "options": {
-          "neverError": true
-        }
+        "url": "http://host.docker.internal:8000/resultados",
+        "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
@@ -33,6 +31,19 @@
       ],
       "id": "355d4625-578a-40ca-931e-6243a6631e88",
       "name": "Obtener resultado"
+    },
+    {
+      "parameters": {
+        "jsCode": "const resultadoId = Number($('Webhook').first().json.body?.resultado_id);\nconst resultados = $input.all().map((item) => item.json);\nconst resultado = resultados.find((item) => Number(item.id) === resultadoId);\nreturn [{ json: resultado || {} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -272,
+        -144
+      ],
+      "id": "b2d87c1d-d5f2-4c13-bcfb-6f9f7a1a1f22",
+      "name": "Preparar resultado"
     },
     {
       "parameters": {
@@ -112,7 +123,7 @@
         "url": "http://host.docker.internal:8000/recomendaciones",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ {\n  \"resultado_id\": $(\"Obtener resultado\").item.json.id,\n  \"texto\": $json.text,\n  \"modelo\": \"gemini\"\n} }}",
+        "jsonBody": "={{ {\n  \"resultado_id\": Number($(\"Webhook\").item.json.body.resultado_id),\n  \"texto\": $json.text,\n  \"modelo\": \"gemini\"\n} }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -171,6 +182,17 @@
       ]
     },
     "Obtener resultado": {
+      "main": [
+        [
+          {
+            "node": "Preparar resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar resultado": {
       "main": [
         [
           {

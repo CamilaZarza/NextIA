@@ -211,5 +211,16 @@
       "sql"
     ],
     "origen": "calculado con reglas de Python"
+  },
+  {
+    "id": 14,
+    "estudiante_id": 6,
+    "oferta_id": 4,
+    "estudiante": "Sofia Lopez",
+    "oferta": "Desarrollador Front end",
+    "score": 100.0,
+    "competencias_faltantes": [],
+    "faltantes_obligatorias": [],
+    "origen": "calculado con reglas de Python"
   }
 ]

@@ -48,5 +48,52 @@
       "sql",
       "git"
     ]
+  },
+  {
+    "id": 6,
+    "nombre": "Sofia Lopez",
+    "carrera": "Desarrolladora Frontend",
+    "competencias": [
+      "Angular",
+      "React",
+      "Git"
+    ]
+  },
+  {
+    "id": 7,
+    "nombre": "Prueba Final",
+    "carrera": "Sistemas",
+    "competencias": [
+      "python",
+      "git"
+    ]
+  },
+  {
+    "id": 8,
+    "nombre": "Prueba UI 203719",
+    "carrera": "Sistemas",
+    "competencias": [
+      "python",
+      "git"
+    ]
+  },
+  {
+    "id": 9,
+    "nombre": "Prueba UI 203802",
+    "carrera": "Sistemas",
+    "competencias": [
+      "python",
+      "git"
+    ]
+  },
+  {
+    "id": 10,
+    "nombre": "Juan Garcia",
+    "carrera": "Dev Ops",
+    "competencias": [
+      "docker",
+      "git",
+      "python"
+    ]
   }
 ]

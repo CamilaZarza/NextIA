@@ -85,7 +85,10 @@ with tab_est:
             st.error(error)
         else:
             estudiante = datos.get("estudiante", datos)
-            st.success(f"Estudiante creado con id {estudiante['id']}")
+            if isinstance(estudiante, dict) and estudiante.get("id") is not None:
+                st.success(f"Estudiante creado con id {estudiante['id']}")
+            else:
+                st.warning("Estudiante registrado correctamente. La respuesta llegó sin el objeto de detalle.")
             st.caption("Proceso automático: n8n → FastAPI → persistencia JSON")
 
     st.subheader("Estudiantes registrados")
@@ -147,7 +150,10 @@ with tab_ofe:
             st.error(error)
         else:
             oferta = datos.get("oferta", datos)
-            st.success(f"Oferta creada con id {oferta['id']}")
+            if isinstance(oferta, dict) and oferta.get("id") is not None:
+                st.success(f"Oferta creada con id {oferta['id']}")
+            else:
+                st.warning("Oferta registrada correctamente. La respuesta llegó sin el objeto de detalle.")
             st.caption("Proceso automático: n8n → FastAPI → persistencia JSON")
 
     st.subheader("Ofertas registradas")

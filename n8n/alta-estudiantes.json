@@ -73,7 +73,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "{\n  \"mensaje\": \"Estudiante registrado correctamente\",\n  \"estudiante\": \"={{ $json }}\"\n}",
+        "responseBody": "={{ $json }}",
         "options": {}
       },
       "type": "n8n-nodes-base.respondToWebhook",

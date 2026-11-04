@@ -47,5 +47,47 @@
     "texto": "Con base en el análisis del Resultado ID 13, se obtuvo un score de compatibilidad de 50 sobre 100. Debido a este puntaje moderado, no se recomienda postularse de manera inmediata sin antes fortalecer el perfil en las áreas requeridas.\n\nLas competencias faltantes identificadas son Docker y SQL. Para mejorar estas habilidades, se sugiere tomar cursos especializados en ambas tecnologías y desarrollar proyectos prácticos que permitan aplicar estos conocimientos de forma demostrable.\n\nRecomendación automatizada: requiere revisión humana.",
     "modelo": "gemini",
     "origen": "generado por IA (requiere revisión humana)"
+  },
+  {
+    "id": 8,
+    "resultado_id": 12,
+    "texto": "Con base en el análisis del Resultado ID 12, se obtuvo un score de compatibilidad de 61.7 sobre 100. Este porcentaje indica que el perfil cuenta con una base aceptable, pero presenta áreas de oportunidad importantes antes de asegurar una postulación exitosa.\n\nDebido a que el puntaje es moderado y se sitúa en una zona de riesgo, no se recomienda postularse de manera inmediata. Es preferible abordar primero las brechas técnicas detectadas para aumentar las probabilidades de éxito en el proceso de selección.\n\nPara mejorar la compatibilidad, se deben realizar acciones concretas enfocadas en adquirir las competencias faltantes: power bi y sql. Se sugiere tomar cursos prácticos y desarrollar proyectos demostrativos en ambas herramientas para respaldar dichas habilidades en el currículum.\n\nRecomendación automatizada: requiere revisión humana.",
+    "modelo": "gemini",
+    "origen": "generado por IA (requiere revisión humana)"
+  },
+  {
+    "id": 9,
+    "resultado_id": 1,
+    "texto": "Con un score de compatibilidad de 61.7 sobre 100 para el Resultado ID: 12, se sugiere evaluar con precaución la postulación, ya que el perfil presenta una alineación moderada con los requisitos del puesto.\n\nPara mejorar las competencias faltantes, se recomienda tomar acciones concretas enfocadas en el aprendizaje y práctica de power bi y sql.\n\nRecomendación automatizada: requiere revisión humana.",
+    "modelo": "gemini",
+    "origen": "generado por IA (requiere revisión humana)"
+  },
+  {
+    "id": 10,
+    "resultado_id": 1,
+    "texto": "Con base en el análisis del Resultado ID 12, se obtuvo un score de compatibilidad de 61.7 sobre 100. Debido a este puntaje moderado, se sugiere proceder con cautela y evaluar la conveniencia de postularse según la urgencia del proceso y los requisitos mínimos del puesto.\n\nPara mejorar el perfil y cubrir las brechas identificadas, se recomienda tomar acciones concretas enfocadas en adquirir capacitación práctica en las competencias faltantes: power bi y sql.\n\nRecomendación automatizada: requiere revisión humana.",
+    "modelo": "gemini",
+    "origen": "generado por IA (requiere revisión humana)"
+  },
+  {
+    "id": 11,
+    "resultado_id": 1,
+    "texto": "Basado en el Resultado ID 12, se obtuvo un score de compatibilidad de 61.7 sobre 100. Con este puntaje, se sugiere evaluar cuidadosamente la postulación, ya que el perfil cuenta con una afinidad moderada con los requisitos del puesto.\n\nPara mejorar la compatibilidad en futuras oportunidades, es necesario desarrollar las competencias faltantes: power bi y sql. Se sugiere tomar cursos específicos y realizar proyectos prácticos enfocados en ambas herramientas para fortalecer el perfil técnico.\n\nRecomendación automatizada: requiere revisión humana.",
+    "modelo": "gemini",
+    "origen": "generado por IA (requiere revisión humana)"
+  },
+  {
+    "id": 12,
+    "resultado_id": 12,
+    "texto": "Con un score de compatibilidad de 61.7 sobre 100 para el Resultado ID: 12, se sugiere evaluar con precaución la postulación, ya que el perfil presenta una alineación moderada con los requisitos del puesto.\n\nPara mejorar las competencias faltantes, se recomienda tomar acciones concretas enfocadas en el aprendizaje y práctica de Power BI y SQL, herramientas clave que actualmente no se registran en el perfil.\n\nRecomendación automatizada: requiere revisión humana.",
+    "modelo": "gemini",
+    "origen": "generado por IA (requiere revisión humana)"
+  },
+  {
+    "id": 13,
+    "resultado_id": 14,
+    "texto": "Basándose en el análisis del Resultado ID: 14, se ha obtenido un score de compatibilidad perfecto de 100 sobre 100, sin registrar competencias faltantes para este perfil.\n\nAnte este nivel óptimo de alineación, se determina que **conviene postularse** de inmediato a la posición, ya que el candidato cumple con la totalidad de los requisitos solicitados.\n\nDado que no se identifican brechas de habilidades, no se requieren acciones formativas adicionales en este momento; se sugiere enfocar los esfuerzos en la presentación de la postulación.\n\nRecomendación automatizada: requiere revisión humana.",
+    "modelo": "gemini",
+    "origen": "generado por IA (requiere revisión humana)"
   }
 ]
