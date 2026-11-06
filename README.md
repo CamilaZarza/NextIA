@@ -367,7 +367,44 @@ El puntaje va de 0 a 100 y se compone de dos partes:
 | GET | `/recomendaciones` | Lista recomendaciones (filtros opcionales `?resultado_id=` y `?estado=`) | 200 |
 | PUT | `/recomendaciones/{id}/revision` | Una persona aprueba o rechaza la recomendación | 200, 404, 422 |
 
-## 9. Uso de inteligencia artificial en el desarrollo
+## 9. Integración de inteligencia artificial en el sistema
+
+### Qué hace la IA
+
+El workflow **Recomendaciones IA** toma un resultado ya calculado por las reglas de Python (score y competencias faltantes) y le pide a un modelo de lenguaje una **recomendación de formación**: si conviene postularse y qué acciones concretas tomar para cubrir las competencias faltantes. La IA no calcula el score ni decide nada: interpreta un resultado determinista y lo traduce a una sugerencia en lenguaje natural.
+
+### Modelo elegido: Google Gemini (`gemini-3.5-flash-lite`)
+
+Se usa a través de los nodos de n8n **Basic LLM Chain** + **Google Gemini Chat Model**.
+
+| Criterio | Por qué Gemini |
+|---|---|
+| Costo | Tiene cuota gratuita con una API key de Google AI Studio, sin tarjeta. Cumple el requisito de no exigir pagos. |
+| Integración | n8n trae un nodo nativo: no hay que programar un cliente HTTP ni manejar el formato de la API. |
+| Hardware | Corre en la nube: no exige GPU ni descargar modelos de varios GB, como pasaría con Ollama en las computadoras del grupo. |
+| Idioma | Genera texto en español de buena calidad. |
+| Variante *flash-lite* | Es la más rápida y liviana. Alcanza para textos cortos y rinde más dentro de la cuota gratuita. |
+
+Alternativa: **Ollama con un modelo local** (por ejemplo Llama o Mistral). Tiene la ventaja de que los datos no salen de la máquina y funciona sin internet, pero necesita más hardware y responde más lento. Como el sistema usa datos ficticios, se priorizó la simplicidad de Gemini.
+
+### Límites conocidos
+
+- **Cuota gratuita limitada**: tiene un máximo de solicitudes por minuto y por día. Si se supera, el workflow falla y la interfaz muestra el error. El resto del sistema sigue funcionando.
+- **Depende de internet y de una credencial**: sin conexión o sin API key configurada en n8n no se generan recomendaciones.
+- **Privacidad**: los datos se envían a Google y, en el plan gratuito, pueden usarse para mejorar sus servicios. Por eso **solo se usan datos ficticios**.
+- **No es determinista**: el mismo resultado puede dar textos distintos en cada ejecución.
+- **Puede equivocarse o inventar**: en las pruebas, las recomendaciones 9, 10 y 11 de `data/recomendaciones.json` están asociadas al resultado 1, pero el texto generado habla del "Resultado ID 12". Por eso ninguna recomendación se da por válida sin revisión humana.
+
+### Validación y supervisión humana
+
+1. **Prompt acotado**: se le pasan solo el score y las competencias faltantes, con la instrucción explícita de no inventar información.
+2. **Validación previa en n8n**: un nodo `IF` verifica que el resultado exista antes de llamar a la IA, así no se gasta cuota en pedidos inválidos.
+3. **Validación en la API**: `POST /recomendaciones` exige que el resultado exista y rechaza textos vacíos o expresiones de n8n sin evaluar (respuesta 422).
+4. **Origen identificado**: los resultados llevan `calculado con reglas de Python` y las recomendaciones `generado por IA (requiere revisión humana)`.
+5. **Revisión humana obligatoria**: cada recomendación nace `pendiente`. Una persona la aprueba o la rechaza desde la pestaña **Recomendaciones IA**, y queda registrado quién la revisó, cuándo y con qué comentario (`PUT /recomendaciones/{id}/revision`).
+6. **Independencia**: el scoring no depende de la IA. Si Gemini no está disponible, el registro, el cálculo de compatibilidad y la consulta de resultados siguen funcionando.
+
+## 10. Uso de inteligencia artificial en el desarrollo
 
 Durante el desarrollo se utilizó GitHub Copilot como herramienta de asistencia para completar tareas técnicas, siempre con revisión, prueba y corrección por parte del grupo. Las principales aplicaciones fueron:
 
