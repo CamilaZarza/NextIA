@@ -1,8 +1,10 @@
+import os
+
 import requests
 import streamlit as st
 
-API_URL = "http://127.0.0.1:8000"
-N8N_URL = "http://127.0.0.1:5678/webhook"
+API_URL = os.getenv("NEXTIA_API_URL", "http://127.0.0.1:8000")
+N8N_URL = os.getenv("NEXTIA_N8N_URL", "http://127.0.0.1:5678/webhook")
 
 st.set_page_config(page_title="NextIA", page_icon="🎯", layout="wide")
 

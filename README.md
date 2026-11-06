@@ -290,6 +290,13 @@ python -m streamlit run interfaz/streamlit_app.py
 
 - Interfaz: http://localhost:8501
 
+Por defecto la interfaz busca la API en `http://127.0.0.1:8000` y n8n en `http://127.0.0.1:5678/webhook`. Si alguno corre en otro puerto, se puede cambiar con variables de entorno antes de iniciar Streamlit:
+
+```powershell
+$env:NEXTIA_API_URL = "http://127.0.0.1:8001"
+$env:NEXTIA_N8N_URL = "http://127.0.0.1:5678/webhook"
+```
+
 ### Terminal 3: n8n con Docker
 
 ```bash
