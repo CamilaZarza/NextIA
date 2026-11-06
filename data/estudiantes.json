@@ -95,5 +95,14 @@
       "git",
       "python"
     ]
+  },
+  {
+    "id": 11,
+    "nombre": "Estudiante Test",
+    "carrera": "Sistemas",
+    "competencias": [
+      "python",
+      "docker"
+    ]
   }
 ]

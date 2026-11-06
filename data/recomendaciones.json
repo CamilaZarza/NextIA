@@ -89,5 +89,26 @@
     "texto": "Basándose en el análisis del Resultado ID: 14, se ha obtenido un score de compatibilidad perfecto de 100 sobre 100, sin registrar competencias faltantes para este perfil.\n\nAnte este nivel óptimo de alineación, se determina que **conviene postularse** de inmediato a la posición, ya que el candidato cumple con la totalidad de los requisitos solicitados.\n\nDado que no se identifican brechas de habilidades, no se requieren acciones formativas adicionales en este momento; se sugiere enfocar los esfuerzos en la presentación de la postulación.\n\nRecomendación automatizada: requiere revisión humana.",
     "modelo": "gemini",
     "origen": "generado por IA (requiere revisión humana)"
+  },
+  {
+    "id": 14,
+    "resultado_id": 1,
+    "texto": "Con base en el resultado ID 1, se obtuvo un score de compatibilidad de 61.7 sobre 100, lo que indica una alineación moderada con el perfil requerido.\n\nConsiderando este puntaje, no se recomienda postularse de manera inmediata sin antes reforzar las áreas técnicas identificadas como deficientes.\n\nPara mejorar la compatibilidad, se sugiere realizar acciones concretas enfocadas en desarrollar competencias en power bi y sql.\n\nRecomendación automatizada: requiere revisión humana.",
+    "modelo": "gemini",
+    "origen": "generado por IA (requiere revisión humana)"
+  },
+  {
+    "id": 15,
+    "resultado_id": 1,
+    "texto": "Con base en el análisis del Resultado ID 1, el score de compatibilidad obtenido es de 61.7 sobre 100. Este porcentaje indica un nivel moderado de adecuación para el puesto evaluado.\n\nAnte estos resultados, se sugiere proceder con cautela respecto a la postulación actual, ya que el perfil carece de competencias clave requeridas, específicamente en power bi y sql. \n\nPara mejorar estas áreas de oportunidad, se recomienda tomar acciones concretas enfocadas en adquirir y certificar conocimientos en power bi y sql.\n\nRecomendación automatizada: requiere revisión humana.",
+    "modelo": "gemini",
+    "origen": "generado por IA (requiere revisión humana)"
+  },
+  {
+    "id": 16,
+    "resultado_id": 19,
+    "texto": "Con base en el análisis del Resultado ID 19, se obtuvo un score de compatibilidad de 61.7 sobre 100, lo que sitúa al candidato en un nivel moderado respecto a los requisitos del puesto. \n\nDada esta puntuación, se considera viable postularse, aunque con reserva, debido a que el perfil actual presenta brechas técnicas específicas que deben atenderse para asegurar un desempeño óptimo en el rol.\n\nPara mejorar la competitividad del perfil, se sugiere tomar acciones concretas enfocadas en adquirir y demostrar dominio en las competencias faltantes: git y node.js, mediante cursos prácticos o proyectos demostrativos.\n\nRecomendación automatizada: requiere revisión humana.",
+    "modelo": "gemini",
+    "origen": "generado por IA (requiere revisión humana)"
   }
 ]
