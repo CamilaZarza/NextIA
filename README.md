@@ -25,16 +25,19 @@ Nextia permite registrar perfiles de estudiantes (con sus competencias) y oferta
 
 ---
 
-### Flujo de datos
- 
-```
-Streamlit  ──(JSON / HTTP)──▶  FastAPI  ──▶  scoring.py (reglas)
- (interfaz)                       │
-                                  ▼
-                           data/*.json (persistencia)
+### Arquitectura
 
-n8n ──(webhook / HTTP)──▶ FastAPI ──▶ data/*.json
+```mermaid
+flowchart LR
+    ST["Streamlit :8501"] -- "webhooks: altas, compatibilidad, IA" --> N8N["n8n :5678 (Docker)"]
+    ST -- "consultas, modificaciones, revisión" --> API["FastAPI :8000"]
+    N8N -- "host.docker.internal:8000" --> API
+    N8N -- HTTPS --> GEM["Google Gemini"]
+    API --> SC["scoring.py"]
+    API <--> DATA[("data/*.json")]
 ```
+
+El diagrama completo, los puertos, la tabla de comunicación entre componentes y el recorrido del proceso principal están en [`docs/arquitectura.md`](docs/arquitectura.md).
 
 ## 3. Workflows de n8n
 
