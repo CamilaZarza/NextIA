@@ -263,57 +263,83 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
  
-## 6. Ejecución
- 
-Se necesitan **tres terminales abiertas desde la raíz del proyecto**.
- 
-### Terminal 1: API FastAPI
- 
-```bash
-# Activar el entorno virtual solo en Windows PowerShell
-.\.venv\Scripts\Activate.ps1
+## 6. Ejecución del proyecto
 
-python -m uvicorn app.main:app --reload
-```
- 
-- API: http://127.0.0.1:8000
-- Documentación interactiva (Swagger): http://127.0.0.1:8000/docs
+El proyecto cuenta con dos modalidades de ejecución:
 
-### Terminal 2: interfaz Streamlit
+### Opción 1: Ejecución completa integrada con Docker Compose (Recomendada)
+
+Permite levantar los tres servicios (**FastAPI**, **Streamlit** y **n8n**) de forma conjunta y orquestada con un único comando:
 
 ```bash
-# Activar el entorno virtual solo en Windows PowerShell
-.\.venv\Scripts\Activate.ps1
-
-python -m streamlit run interfaz/streamlit_app.py
+docker compose up -d
 ```
 
-- Interfaz: http://localhost:8501
+#### Puertos y accesos:
+| Servicio | Contenedor | Puerto local | Acceso en el navegador |
+|---|---|---|---|
+| **Streamlit** (Interfaz) | `nextia-streamlit` | `8501` | http://localhost:8501 |
+| **FastAPI** (API REST) | `nextia-api` | `8000` | http://localhost:8000/docs (Swagger) |
+| **n8n** (Automatización e IA) | `nextia-n8n` | `5678` | http://localhost:5678 |
 
-### Terminal 3: n8n con Docker
+#### Comunicación entre contenedores:
+- **Streamlit → FastAPI:** Se comunica internamente mediante `http://api:8000` (definido por variable de entorno `API_URL`).
+- **Streamlit → n8n:** Envía webhooks a `http://n8n:5678/webhook` (definido por variable de entorno `N8N_URL`).
+- **n8n → FastAPI:** Llama a los endpoints de la API mediante `http://host.docker.internal:8000` (o directamente `http://api:8000`).
+- **Persistencia:** La carpeta local `./data` está montada como volumen en `/app/data` del contenedor de la API, preservando los cambios en los archivos JSON.
 
+#### Comandos útiles de Docker Compose:
 ```bash
-docker compose -f n8n/compose.yaml up -d
+# Ver el estado de los tres contenedores
+docker compose ps
+
+# Ver los logs en tiempo real (de todos los servicios o uno en particular)
+docker compose logs -f
+docker compose logs -f api
+docker compose logs -f streamlit
+docker compose logs -f n8n
+
+# Reiniciar los servicios
+docker compose restart
+
+# Detener todos los servicios
+docker compose down
 ```
 
-- n8n: http://localhost:5678
+---
 
-Comandos útiles:
-  
-```bash
-# Detener n8n
-docker compose -f n8n/compose.yaml down
+### Opción 2: Ejecución manual (desarrollo local)
 
-# Reiniciar n8n
-docker compose -f n8n/compose.yaml restart
+Si se desea ejecutar la API y la interfaz en el entorno virtual de Python y únicamente n8n en Docker:
 
-# Consultar el estado de los contenedores
-docker compose -f n8n/compose.yaml ps
-```
- 
-Para detener FastAPI o Streamlit, presionar `Ctrl + C` en la terminal correspondiente. Para detener n8n, utilizar el comando `docker compose -f n8n/compose.yaml down`.
- 
-> Si la API debe ser accesible desde otro equipo o contenedor de la red local, iniciarla con `--host 0.0.0.0`.
+1. **Terminal 1 - Iniciar n8n con Docker:**
+   ```bash
+   docker compose -f n8n/compose.yaml up -d
+   ```
+   Disponible en: http://localhost:5678
+
+2. **Terminal 2 - Iniciar la API FastAPI:**
+   ```bash
+   # Windows PowerShell:
+   .\.venv\Scripts\Activate.ps1
+   # Mac / Linux:
+   source .venv/bin/activate
+
+   python -m uvicorn app.main:app --reload
+   ```
+   Disponible en: http://127.0.0.1:8000 (Swagger en `/docs`)
+
+3. **Terminal 3 - Iniciar Streamlit:**
+   ```bash
+   # Windows PowerShell:
+   .\.venv\Scripts\Activate.ps1
+   # Mac / Linux:
+   source .venv/bin/activate
+
+   python -m streamlit run interfaz/streamlit_app.py
+   ```
+   Disponible en: http://localhost:8501
+
  
 ## 7. Funcionalidades principales
  
