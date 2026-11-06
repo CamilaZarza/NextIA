@@ -74,9 +74,36 @@ Para importar los workflows:
 2. Seleccionar **Workflows > Import from File**.
 3. Importar cada archivo de la carpeta `n8n/`.
 4. Guardar y activar el workflow correspondiente.
-5. Configurar las credenciales necesarias para el workflow de recomendaciones.
+5. Configurar la credencial de Gemini para el workflow de recomendaciones (ver abajo).
 
 Los archivos exportados están configurados como activos (`active: true`). Igualmente, deben activarse desde la interfaz de n8n si esta muestra el workflow como inactivo después de importarlo o reiniciar el entorno.
+
+**Configurar la credencial de Gemini** (una sola vez, porque queda guardada en el volumen `n8n_data`):
+
+1. Abrir el workflow **Recomendaciones IA**.
+2. Abrir el nodo **Google Gemini Chat Model** → *Credential* → *Create new credential*.
+3. Pegar la API key en *API Key*, dejar el *Host* por defecto y guardar.
+4. Guardar y publicar el workflow.
+
+La API key nunca se sube al repositorio: n8n la guarda cifrada en su volumen local y los workflows exportados solo guardan una referencia a la credencial.
+
+**Configuración Docker** (`n8n/compose.yaml`):
+
+| Elemento | Valor | Para qué |
+|---|---|---|
+| Imagen | `docker.n8n.io/n8nio/n8n:2.46.6` | Versión fija, para que todos usen el mismo n8n |
+| Contenedor | `nextia-n8n` | Nombre para `docker logs nextia-n8n` o `docker exec` |
+| Puerto | `5678:5678` | Editor web y webhooks |
+| `extra_hosts` | `host.docker.internal:host-gateway` | Permite que n8n llegue a la API que corre en el equipo anfitrión |
+| Volumen | `n8n_data:/home/node/.n8n` | Conserva workflows, credenciales y usuario entre reinicios |
+| Zona horaria | `America/Argentina/Buenos_Aires` | Fechas de ejecución correctas |
+
+Si se actualiza la versión de la imagen, hay que bajarla y recrear el contenedor:
+
+```powershell
+docker compose -f n8n/compose.yaml pull
+docker compose -f n8n/compose.yaml up -d
+```
 
 ### 3.2 Alta automatizada de estudiantes
 
@@ -247,7 +274,9 @@ Si la solicitud tiene datos incompletos, el workflow responde con estado `400` y
  
 - Python 3.10 o superior
 - Git
-- Librerías: `fastapi`, `uvicorn`, `streamlit`, `requests` (ver `requirements.txt`)
+- Docker Desktop (con Docker Compose), para ejecutar n8n
+- Una API key gratuita de Google Gemini, que se obtiene en https://aistudio.google.com/apikey con una cuenta de Google. Solo hace falta para el workflow de recomendaciones con IA.
+- Librerías: `fastapi`, `uvicorn`, `pydantic`, `streamlit`, `requests` (ver `requirements.txt`)
 ## 5. Instalación
  
 ```bash
