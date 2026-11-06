@@ -63,8 +63,8 @@ def a_lista(texto: str) -> list[str]:
 st.title("🎯 Nextia")
 st.caption("Plataforma de vinculación y desarrollo profesional")
 
-tab_est, tab_ofe, tab_comp, tab_res = st.tabs(
-    ["Estudiantes", "Ofertas", "Compatibilidad", "Resultados"]
+tab_est, tab_ofe, tab_comp, tab_res, tab_rec = st.tabs(
+    ["Estudiantes", "Ofertas", "Compatibilidad", "Resultados", "Recomendaciones IA"]
 )
 
 # ---------------- ESTUDIANTES ----------------
@@ -164,6 +164,40 @@ with tab_ofe:
         st.error(error)
     elif ofertas:
         st.dataframe(ofertas, use_container_width=True)
+
+        st.subheader("Modificar una oferta")
+        elegida = st.selectbox(
+            "Elegí una oferta",
+            ofertas,
+            format_func=lambda o: f"{o['id']} - {o['titulo']} ({o['empresa']})",
+            key="editar_oferta",
+        )
+        with st.form("form_editar_oferta"):
+            nuevo_titulo = st.text_input("Título del puesto", value=elegida["titulo"], key=f"tit_{elegida['id']}")
+            nueva_empresa = st.text_input("Empresa", value=elegida["empresa"], key=f"emp_{elegida['id']}")
+            nuevos_obl = st.text_input(
+                "Requisitos obligatorios (coma)",
+                value=", ".join(elegida["requisitos_obligatorios"]),
+                key=f"obl_{elegida['id']}",
+            )
+            nuevos_des = st.text_input(
+                "Requisitos deseables (coma)",
+                value=", ".join(elegida["requisitos_deseables"]),
+                key=f"des_{elegida['id']}",
+            )
+            actualizar_oferta = st.form_submit_button("Actualizar")
+        if actualizar_oferta:
+            cambios = {
+                "titulo": nuevo_titulo,
+                "empresa": nueva_empresa,
+                "requisitos_obligatorios": a_lista(nuevos_obl),
+                "requisitos_deseables": a_lista(nuevos_des),
+            }
+            datos, error = llamar_api("PUT", f"/ofertas/{elegida['id']}", json=cambios)
+            if error:
+                st.error(error)
+            else:
+                st.success("Oferta actualizada (la tabla se refresca en la próxima acción)")
     else:
         st.info("Todavía no hay ofertas.")
 
@@ -258,3 +292,28 @@ with tab_res:
                 )
     else:
         st.info("Todavía no se calculó ninguna compatibilidad.")
+
+# ---------------- RECOMENDACIONES IA ----------------
+with tab_rec:
+    st.subheader("Historial de recomendaciones generadas por IA")
+    recomendaciones, error = llamar_api("GET", "/recomendaciones")
+    if error:
+        st.error(error)
+    elif recomendaciones:
+        ids_resultado = sorted({r["resultado_id"] for r in recomendaciones})
+        filtro = st.selectbox(
+            "Filtrar por resultado",
+            ["Todos", *ids_resultado],
+            format_func=lambda x: x if x == "Todos" else f"Resultado #{x}",
+            key="filtro_rec_resultado",
+        )
+        if filtro != "Todos":
+            recomendaciones = [r for r in recomendaciones if r["resultado_id"] == filtro]
+
+        st.caption(f"{len(recomendaciones)} recomendación(es)")
+        for rec in reversed(recomendaciones):  # las más nuevas primero
+            with st.expander(f"#{rec['id']} · Resultado #{rec['resultado_id']} · modelo {rec['modelo']}"):
+                st.write(rec["texto"])
+                st.caption(f"Origen: {rec['origen']}")
+    else:
+        st.info("Todavía no se generó ninguna recomendación.")

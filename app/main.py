@@ -66,6 +66,17 @@ def listar_ofertas() -> list[dict]:
     return db.leer("ofertas")
 
 
+@app.put("/ofertas/{oferta_id}")
+def actualizar_oferta(oferta_id: int, datos: OfertaEntrada) -> dict:
+    ofertas = db.leer("ofertas")
+    for posicion, oferta in enumerate(ofertas):
+        if oferta["id"] == oferta_id:
+            ofertas[posicion] = {"id": oferta_id, **datos.model_dump()}
+            db.guardar("ofertas", ofertas)
+            return ofertas[posicion]
+    raise HTTPException(status_code=404, detail=f"Oferta {oferta_id} no existe")
+
+
 # ---------- Procesamiento ----------
 @app.post("/compatibilidad", status_code=201)
 def calcular(datos: CompatibilidadEntrada) -> dict:

@@ -324,12 +324,13 @@ Para detener FastAPI o Streamlit, presionar `Ctrl + C` en la terminal correspond
  
 ## 7. Funcionalidades principales
  
-La interfaz tiene cuatro pestañas:
+La interfaz tiene cinco pestañas:
  
 1. **Estudiantes**: alta de perfiles, listado y modificación de competencias.
-2. **Ofertas**: alta de ofertas con requisitos obligatorios y deseables, y listado.
+2. **Ofertas**: alta de ofertas con requisitos obligatorios y deseables, listado y modificación.
 3. **Compatibilidad**: se elige un estudiante y una oferta y se calcula el score, con barra de progreso y competencias faltantes.
-4. **Resultados**: historial de compatibilidades calculadas.
+4. **Resultados**: historial de compatibilidades calculadas y generación de recomendaciones con IA.
+5. **Recomendaciones IA**: historial de recomendaciones generadas, con filtro por resultado.
 ### Cómo se calcula el score
  
 El puntaje va de 0 a 100 y se compone de dos partes:
@@ -358,6 +359,7 @@ El puntaje va de 0 a 100 y se compone de dos partes:
 | PUT | `/estudiantes/{id}` | Modifica un estudiante | 200, 404, 422 |
 | POST | `/ofertas` | Registra una oferta | 201, 422 |
 | GET | `/ofertas` | Lista las ofertas | 200 |
+| PUT | `/ofertas/{id}` | Modifica una oferta | 200, 404, 422 |
 | POST | `/compatibilidad` | Calcula y guarda el scoring de un estudiante frente a una oferta | 201, 400, 404, 422 |
 | GET | `/resultados` | Lista los resultados (filtro opcional `?estudiante_id=`) | 200 |
 | GET | `/resultados/{id}` | Obtiene un resultado puntual | 200, 404 |
