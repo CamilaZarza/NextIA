@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import FastAPI, HTTPException
 
 from app import almacenamiento as db
@@ -6,6 +8,7 @@ from app.modelos import (
     EstudianteEntrada,
     OfertaEntrada,
     RecomendacionEntrada,
+    RevisionEntrada,
 )
 from app.scoring import calcular_compatibilidad
 
@@ -121,6 +124,7 @@ def guardar_recomendacion(datos: RecomendacionEntrada) -> dict:
         "id": db.siguiente_id(recomendaciones),
         **datos.model_dump(),
         "origen": "generado por IA (requiere revisión humana)",
+        "estado": "pendiente",
     }
     recomendaciones.append(nueva)
     db.guardar("recomendaciones", recomendaciones)
@@ -128,8 +132,26 @@ def guardar_recomendacion(datos: RecomendacionEntrada) -> dict:
 
 
 @app.get("/recomendaciones")
-def listar_recomendaciones(resultado_id: int | None = None) -> list[dict]:
-    recomendaciones = db.leer("recomendaciones")
+def listar_recomendaciones(resultado_id: int | None = None, estado: str | None = None) -> list[dict]:
+    # Las recomendaciones guardadas antes de la revisión humana no tienen estado: quedan pendientes
+    recomendaciones = [{"estado": "pendiente", **r} for r in db.leer("recomendaciones")]
     if resultado_id is not None:
         recomendaciones = [r for r in recomendaciones if r["resultado_id"] == resultado_id]
+    if estado is not None:
+        recomendaciones = [r for r in recomendaciones if r["estado"] == estado]
     return recomendaciones
+
+
+@app.put("/recomendaciones/{recomendacion_id}/revision")
+def revisar_recomendacion(recomendacion_id: int, datos: RevisionEntrada) -> dict:
+    """Una persona aprueba o rechaza una recomendación generada por IA."""
+    recomendaciones = db.leer("recomendaciones")
+    for recomendacion in recomendaciones:
+        if recomendacion["id"] == recomendacion_id:
+            recomendacion.update(
+                **datos.model_dump(),
+                fecha_revision=datetime.now().isoformat(timespec="seconds"),
+            )
+            db.guardar("recomendaciones", recomendaciones)
+            return recomendacion
+    raise HTTPException(status_code=404, detail=f"Recomendación {recomendacion_id} no existe")

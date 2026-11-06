@@ -330,7 +330,7 @@ La interfaz tiene cinco pestañas:
 2. **Ofertas**: alta de ofertas con requisitos obligatorios y deseables, listado y modificación.
 3. **Compatibilidad**: se elige un estudiante y una oferta y se calcula el score, con barra de progreso y competencias faltantes.
 4. **Resultados**: historial de compatibilidades calculadas y generación de recomendaciones con IA.
-5. **Recomendaciones IA**: historial de recomendaciones generadas, con filtro por resultado.
+5. **Recomendaciones IA**: historial de recomendaciones generadas, con filtros por resultado y por estado, y **revisión humana**: cada recomendación nace `pendiente` y una persona la aprueba o la rechaza dejando su nombre y un comentario.
 ### Cómo se calcula el score
  
 El puntaje va de 0 a 100 y se compone de dos partes:
@@ -363,8 +363,9 @@ El puntaje va de 0 a 100 y se compone de dos partes:
 | POST | `/compatibilidad` | Calcula y guarda el scoring de un estudiante frente a una oferta | 201, 400, 404, 422 |
 | GET | `/resultados` | Lista los resultados (filtro opcional `?estudiante_id=`) | 200 |
 | GET | `/resultados/{id}` | Obtiene un resultado puntual | 200, 404 |
-| POST | `/recomendaciones` | Guarda una recomendación asociada a un resultado | 201, 404, 422 |
-| GET | `/recomendaciones` | Lista recomendaciones (filtro opcional `?resultado_id=`) | 200 |
+| POST | `/recomendaciones` | Guarda una recomendación asociada a un resultado (queda `pendiente`) | 201, 404, 422 |
+| GET | `/recomendaciones` | Lista recomendaciones (filtros opcionales `?resultado_id=` y `?estado=`) | 200 |
+| PUT | `/recomendaciones/{id}/revision` | Una persona aprueba o rechaza la recomendación | 200, 404, 422 |
 
 ## 9. Uso de inteligencia artificial en el desarrollo
 

@@ -310,10 +310,50 @@ with tab_rec:
         if filtro != "Todos":
             recomendaciones = [r for r in recomendaciones if r["resultado_id"] == filtro]
 
+        filtro_estado = st.radio(
+            "Estado de revisión",
+            ["todas", "pendiente", "aprobada", "rechazada"],
+            horizontal=True,
+            key="filtro_rec_estado",
+        )
+        if filtro_estado != "todas":
+            recomendaciones = [r for r in recomendaciones if r["estado"] == filtro_estado]
+
+        ICONOS = {"pendiente": "🕒", "aprobada": "✅", "rechazada": "❌"}
         st.caption(f"{len(recomendaciones)} recomendación(es)")
         for rec in reversed(recomendaciones):  # las más nuevas primero
-            with st.expander(f"#{rec['id']} · Resultado #{rec['resultado_id']} · modelo {rec['modelo']}"):
+            titulo_rec = (
+                f"{ICONOS[rec['estado']]} #{rec['id']} · Resultado #{rec['resultado_id']} "
+                f"· modelo {rec['modelo']} · {rec['estado']}"
+            )
+            with st.expander(titulo_rec):
                 st.write(rec["texto"])
                 st.caption(f"Origen: {rec['origen']}")
+
+                if rec["estado"] != "pendiente":
+                    st.info(
+                        f"Revisada por {rec['revisor']} el {rec['fecha_revision']}"
+                        + (f": {rec['comentario']}" if rec.get("comentario") else "")
+                    )
+                    continue
+
+                # Supervisión humana: nada generado por IA se da por válido sin esta revisión
+                with st.form(f"form_revision_{rec['id']}"):
+                    revisor = st.text_input("Revisor/a", key=f"revisor_{rec['id']}")
+                    comentario = st.text_input("Comentario (opcional)", key=f"coment_{rec['id']}")
+                    col_ok, col_no = st.columns(2)
+                    aprobar = col_ok.form_submit_button("Aprobar")
+                    rechazar = col_no.form_submit_button("Rechazar")
+                if aprobar or rechazar:
+                    revision = {
+                        "estado": "aprobada" if aprobar else "rechazada",
+                        "revisor": revisor,
+                        "comentario": comentario,
+                    }
+                    datos, error = llamar_api("PUT", f"/recomendaciones/{rec['id']}/revision", json=revision)
+                    if error:
+                        st.error(error)
+                    else:
+                        st.success(f"Recomendación {datos['estado']} (se refresca en la próxima acción)")
     else:
         st.info("Todavía no se generó ninguna recomendación.")
