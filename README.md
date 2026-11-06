@@ -265,24 +265,53 @@ pip install -r requirements.txt
  
 ## 6. Ejecución
  
-Se necesitan **dos terminales**, con el entorno virtual activado en ambas y ubicadas en la raíz del proyecto.
+Se necesitan **tres terminales abiertas desde la raíz del proyecto**.
  
-**Terminal 1: API**
+### Terminal 1: API FastAPI
  
 ```bash
+# Activar el entorno virtual solo en Windows PowerShell
+.\.venv\Scripts\Activate.ps1
+
 python -m uvicorn app.main:app --reload
 ```
  
 - API: http://127.0.0.1:8000
 - Documentación interactiva (Swagger): http://127.0.0.1:8000/docs
-**Terminal 2: Interfaz**
- 
+
+### Terminal 2: interfaz Streamlit
+
 ```bash
+# Activar el entorno virtual solo en Windows PowerShell
+.\.venv\Scripts\Activate.ps1
+
 python -m streamlit run interfaz/streamlit_app.py
 ```
- 
+
 - Interfaz: http://localhost:8501
-Para detener cualquiera de los dos servicios, presionar `Ctrl + C` en su terminal.
+
+### Terminal 3: n8n con Docker
+
+```bash
+docker compose -f n8n/compose.yaml up -d
+```
+
+- n8n: http://localhost:5678
+
+Comandos útiles:
+  
+```bash
+# Detener n8n
+docker compose -f n8n/compose.yaml down
+
+# Reiniciar n8n
+docker compose -f n8n/compose.yaml restart
+
+# Consultar el estado de los contenedores
+docker compose -f n8n/compose.yaml ps
+```
+ 
+Para detener FastAPI o Streamlit, presionar `Ctrl + C` en la terminal correspondiente. Para detener n8n, utilizar el comando `docker compose -f n8n/compose.yaml down`.
  
 > Si la API debe ser accesible desde otro equipo o contenedor de la red local, iniciarla con `--host 0.0.0.0`.
  
@@ -327,4 +356,15 @@ El puntaje va de 0 a 100 y se compone de dos partes:
 | GET | `/resultados/{id}` | Obtiene un resultado puntual | 200, 404 |
 | POST | `/recomendaciones` | Guarda una recomendación asociada a un resultado | 201, 404, 422 |
 | GET | `/recomendaciones` | Lista recomendaciones (filtro opcional `?resultado_id=`) | 200 |
+
+## 9. Uso de inteligencia artificial en el desarrollo
+
+Durante el desarrollo se utilizó GitHub Copilot como herramienta de asistencia para completar tareas técnicas, siempre con revisión, prueba y corrección por parte del grupo. Las principales aplicaciones fueron:
+
+| Uso | Cómo colaboró la IA | Verificación realizada |
+|---|---|---|
+| Validación de errores en workflows de n8n | Ayudó a revisar la configuración de los nodos, las conexiones entre pasos y la detección de errores en las validaciones y respuestas HTTP. | Se importaron los workflows, se probaron rutas válidas y inválidas y se verificaron las respuestas del sistema. |
+| Elaboración de la interfaz con Streamlit | Apoyó en la organización de pestañas, formularios, tablas, mensajes de estado y la comunicación con FastAPI y n8n. | Se probaron manualmente los formularios, las llamadas HTTP, la actualización de datos y los casos de error desde la interfaz. |
+
+La IA no reemplazó la decisión ni la responsabilidad del grupo sobre el funcionamiento final. Cada cambio fue probado, ajustado y integrado al proyecto antes de considerarlo correcto. Además, la IA integrada al sistema mediante Gemini genera recomendaciones de formación; el scoring corresponde a una lógica determinista desarrollada en Python y puede funcionar independientemente.
  
