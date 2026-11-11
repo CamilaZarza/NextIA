@@ -6,7 +6,7 @@
 flowchart LR
     U(["Usuario"])
 
-    subgraph HOST["Equipo anfitrión"]
+    subgraph HOST["Servicios Python · contenedores nextia-api y nextia-streamlit (o venv local)"]
         ST["Streamlit<br/>interfaz/streamlit_app.py<br/>:8501"]
         subgraph API["FastAPI · app/ · :8000"]
             MAIN["main.py<br/>endpoints"]
@@ -17,7 +17,7 @@ flowchart LR
         DATA[("data/*.json<br/>estudiantes · ofertas<br/>resultados · recomendaciones")]
     end
 
-    subgraph DOCKER["Docker · n8n/compose.yaml"]
+    subgraph DOCKER["Contenedor nextia-n8n"]
         N8N["n8n :5678<br/>4 workflows"]
         VOL[("volumen n8n_data")]
     end
@@ -45,17 +45,18 @@ flowchart LR
 
 ## 2. Puertos y servicios
 
-| Servicio | Dónde corre | Puerto | URL |
-|---|---|---|---|
-| Streamlit | Equipo anfitrión (venv) | 8501 | http://localhost:8501 |
-| FastAPI | Equipo anfitrión (venv) | 8000 | http://127.0.0.1:8000 · Swagger en `/docs` |
-| n8n | Contenedor Docker `nextia-n8n` | 5678 → 5678 | http://localhost:5678 |
-| Gemini | Servicio externo de Google | 443 (HTTPS) | Configurado como credencial en n8n |
+El sistema se puede ejecutar de dos formas (ver README):
 
-- n8n corre dentro de Docker, así que no puede usar `127.0.0.1` para llegar a la API: ese sería el propio contenedor. Por eso los workflows usan `http://host.docker.internal:8000`, y `compose.yaml` define `extra_hosts: host.docker.internal:host-gateway` para que ese nombre resuelva al equipo anfitrión.
-- Para que la API acepte conexiones que vienen del contenedor, conviene iniciarla con `--host 0.0.0.0`.
-- La configuración y los workflows de n8n se guardan en el volumen `n8n_data`, así que sobreviven a `docker compose down`.
-- La interfaz permite cambiar las URLs de la API y de n8n con las variables `NEXTIA_API_URL` y `NEXTIA_N8N_URL`.
+| Servicio | Con `compose.yaml` (todo en Docker) | Con `n8n/compose.yaml` (desarrollo local) | Puerto | URL |
+|---|---|---|---|---|
+| Streamlit | Contenedor `nextia-streamlit` | venv local | 8501 | http://localhost:8501 |
+| FastAPI | Contenedor `nextia-api` | venv local | 8000 | http://localhost:8000 · Swagger en `/docs` |
+| n8n | Contenedor `nextia-n8n` | Contenedor `nextia-n8n` | 5678 | http://localhost:5678 |
+| Gemini | Servicio externo de Google | ídem | 443 (HTTPS) | Credencial configurada en n8n |
+
+- **Streamlit → servicios:** en Docker Compose, Streamlit usa los nombres de servicio de la red interna: `API_URL=http://api:8000` y `N8N_URL=http://n8n:5678/webhook`. En local usa `127.0.0.1` por defecto. Las dos variables permiten cambiarlo.
+- **n8n → API:** en los dos modos los workflows usan `http://host.docker.internal:8000`. Esa URL llega al puerto 8000 publicado en el equipo anfitrión, ya sea el del contenedor `nextia-api` o el de uvicorn local. `extra_hosts: host.docker.internal:host-gateway` hace que ese nombre resuelva al anfitrión. En local, conviene iniciar uvicorn con `--host 0.0.0.0` para que acepte esas conexiones.
+- **Persistencia:** `data/` se monta como volumen en `nextia-api`, así que los JSON del repositorio son los mismos en los dos modos. La configuración, los workflows y las credenciales de n8n se guardan en un volumen de Docker y sobreviven a `docker compose down`.
 
 ## 3. Comunicación entre componentes
 

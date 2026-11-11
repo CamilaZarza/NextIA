@@ -3,8 +3,8 @@ import os
 import requests
 import streamlit as st
 
-API_URL = os.getenv("NEXTIA_API_URL", "http://127.0.0.1:8000")
-N8N_URL = os.getenv("NEXTIA_N8N_URL", "http://127.0.0.1:5678/webhook")
+API_URL = os.getenv("API_URL", "http://127.0.0.1:8000")
+N8N_URL = os.getenv("N8N_URL", "http://127.0.0.1:5678/webhook")
 
 st.set_page_config(page_title="NextIA", page_icon="🎯", layout="wide")
 
@@ -245,51 +245,121 @@ with tab_comp:
 
 # ---------------- RESULTADOS ----------------
 with tab_res:
-    st.subheader("Resultados guardados")
+    st.subheader("📊 Resultados y Recomendaciones con IA")
     resultados, error = llamar_api("GET", "/resultados")
     if error:
         st.error(error)
     elif resultados:
-        st.dataframe(resultados, use_container_width=True)
-
-        resultado_elegido = st.selectbox(
-            "Resultado para generar recomendación",
-            resultados,
-            format_func=lambda r: (
-                f"#{r['id']} - {r['estudiante']} / {r['oferta']} ({r['score']} puntos)"
-            ),
-            key="resultado_ia",
+        subtab_analisis, subtab_tablas = st.tabs(
+            ["✨ Asistente y Diagnóstico IA", "📋 Historial y Auditoría de Datos"]
         )
 
-        if st.button("Generar recomendación con IA"):
-            datos, error_ia = llamar_webhook(
-                "generar-recomendacion",
-                {"resultado_id": resultado_elegido["id"]},
+        with subtab_analisis:
+            st.markdown(
+                "Seleccioná una postulación para revisar el diagnóstico técnico y consultar o generar recomendaciones personalizadas con IA:"
             )
-            if error_ia:
-                st.error(error_ia)
-            else:
-                st.success("Recomendación generada mediante n8n + Google Gemini")
-                recomendacion = datos.get("resultado", datos)
-                if isinstance(recomendacion, dict):
-                    texto = recomendacion.get("texto", "")
-                else:
-                    texto = str(recomendacion)
-                if texto and texto != "={{ $json }}":
-                    st.write(texto)
-                else:
-                    recomendaciones, error_rec = llamar_api(
+
+            # Ordenar para mostrar los más recientes arriba
+            resultados_inversos = list(reversed(resultados))
+            resultado_elegido = st.selectbox(
+                "Postulación evaluada:",
+                resultados_inversos,
+                format_func=lambda r: (
+                    f"#{r['id']} · {r['estudiante']}  ➔  {r['oferta']}  ({r['score']} pts)"
+                ),
+                key="resultado_ia",
+            )
+
+            col_diag, col_ia = st.columns([1, 1], gap="large")
+
+            with col_diag:
+                with st.container(border=True):
+                    st.markdown("#### 📐 Diagnóstico de Compatibilidad")
+                    st.caption("Calculado de forma determinista mediante reglas de Python")
+
+                    score = float(resultado_elegido["score"])
+                    if score >= 70:
+                        st.success(f"**Score de afinidad:** {score} / 100 — Alto match")
+                    elif score >= 40:
+                        st.warning(f"**Score de afinidad:** {score} / 100 — Match intermedio")
+                    else:
+                        st.error(f"**Score de afinidad:** {score} / 100 — Brecha formativa alta")
+
+                    st.progress(min(int(score), 100))
+
+                    st.markdown("##### 📌 Brechas detectadas")
+                    faltantes_obl = resultado_elegido.get("faltantes_obligatorias", [])
+                    todas_faltantes = resultado_elegido.get("competencias_faltantes", [])
+                    faltantes_des = [c for c in todas_faltantes if c not in faltantes_obl]
+
+                    if faltantes_obl:
+                        st.markdown(f"🔴 **Obligatorias:** `{'`, `'.join(faltantes_obl)}`")
+                    if faltantes_des:
+                        st.markdown(f"🟡 **Deseables:** `{'`, `'.join(faltantes_des)}`")
+                    if not todas_faltantes:
+                        st.success("✅ Cumple todos los requisitos.")
+
+                    st.caption(f"🏷️ Origen: `{resultado_elegido.get('origen', 'calculado con reglas de Python')}`")
+
+            with col_ia:
+                with st.container(border=True):
+                    st.markdown("#### 🤖 Plan de Mejora con IA")
+                    st.caption("Generado por Google Gemini vía n8n")
+
+                    recs, error_rec = llamar_api(
                         "GET",
                         "/recomendaciones",
                         params={"resultado_id": resultado_elegido["id"]},
                     )
-                    if error_rec:
-                        st.error(error_rec)
-                    elif recomendaciones:
-                        st.write(recomendaciones[-1]["texto"])
-                st.caption(
-                    "Origen: Google Gemini vía n8n · Recomendación automatizada: requiere revisión humana."
-                )
+
+                    if recs:
+                        if len(recs) > 1:
+                            indice_rec = st.selectbox(
+                                "Versión de la recomendación:",
+                                range(len(recs)),
+                                format_func=lambda i: f"Versión #{i+1} (ID #{recs[i]['id']})",
+                                index=len(recs) - 1,
+                                key=f"sel_rec_{resultado_elegido['id']}",
+                            )
+                            rec_activa = recs[indice_rec]
+                        else:
+                            rec_activa = recs[0]
+
+                        st.info(rec_activa["texto"])
+                        st.caption(
+                            f"✨ Modelo: `{rec_activa.get('modelo', 'gemini')}` · ⚠️ `{rec_activa.get('origen', 'requiere revisión humana')}`"
+                            f" · Revisión: `{rec_activa['estado']}`"
+                        )
+                        if rec_activa["estado"] == "pendiente":
+                            st.caption("Aprobala o rechazala desde la pestaña **Recomendaciones IA**.")
+                    else:
+                        st.info("ℹ️ Todavía no se ha generado una recomendación para esta postulación.")
+
+                    if st.button("⚡ Generar nueva recomendación con IA", type="primary", use_container_width=True):
+                        with st.spinner("Consultando a Google Gemini vía n8n..."):
+                            datos, error_ia = llamar_webhook(
+                                "generar-recomendacion",
+                                {"resultado_id": resultado_elegido["id"]},
+                            )
+                        if error_ia:
+                            st.error(error_ia)
+                        else:
+                            st.success("¡Recomendación generada y guardada con éxito!")
+                            st.rerun()
+
+        with subtab_tablas:
+            st.markdown("#### 📊 Historial completo de compatibilidades")
+            st.dataframe(resultados, use_container_width=True)
+
+            st.divider()
+            st.markdown("#### 📝 Auditoría general de recomendaciones con IA")
+            todas_recs, error_todas = llamar_api("GET", "/recomendaciones")
+            if error_todas:
+                st.error(error_todas)
+            elif todas_recs:
+                st.dataframe(todas_recs, use_container_width=True)
+            else:
+                st.info("No hay recomendaciones en la base de datos.")
     else:
         st.info("Todavía no se calculó ninguna compatibilidad.")
 

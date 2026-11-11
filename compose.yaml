@@ -1,0 +1,44 @@
+services:
+  api:
+    build: .
+    container_name: nextia-api
+    command: python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./app:/app/app
+    restart: unless-stopped
+
+  streamlit:
+    build: .
+    container_name: nextia-streamlit
+    command: python -m streamlit run interfaz/streamlit_app.py --server.port 8501 --server.address 0.0.0.0 --server.headless true
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./interfaz:/app/interfaz
+    environment:
+      - API_URL=http://api:8000
+      - N8N_URL=http://n8n:5678/webhook
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  n8n:
+    # Versión fija para que todo el grupo y la defensa usen exactamente el mismo n8n
+    image: docker.n8n.io/n8nio/n8n:2.46.6
+    container_name: nextia-n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - GENERIC_TIMEZONE=America/Argentina/Buenos_Aires
+      - TZ=America/Argentina/Buenos_Aires
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    restart: unless-stopped
+
+volumes:
+  n8n_data:

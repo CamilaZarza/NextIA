@@ -51,5 +51,16 @@
     "requisitos_deseables": [
       "git"
     ]
+  },
+  {
+    "id": 5,
+    "titulo": "Dev Test",
+    "empresa": "Tech",
+    "requisitos_obligatorios": [
+      "python"
+    ],
+    "requisitos_deseables": [
+      "git"
+    ]
   }
 ]

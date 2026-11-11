@@ -222,5 +222,102 @@
     "competencias_faltantes": [],
     "faltantes_obligatorias": [],
     "origen": "calculado con reglas de Python"
+  },
+  {
+    "id": 15,
+    "estudiante_id": 2,
+    "oferta_id": 1,
+    "estudiante": "Carlos Gómez",
+    "oferta": "Analista de datos Jr",
+    "score": 23.3,
+    "competencias_faltantes": [
+      "excel",
+      "git",
+      "power bi",
+      "python"
+    ],
+    "faltantes_obligatorias": [
+      "excel",
+      "python"
+    ],
+    "origen": "calculado con reglas de Python"
+  },
+  {
+    "id": 16,
+    "estudiante_id": 2,
+    "oferta_id": 1,
+    "estudiante": "Carlos Gómez",
+    "oferta": "Analista de datos Jr",
+    "score": 23.3,
+    "competencias_faltantes": [
+      "excel",
+      "git",
+      "power bi",
+      "python"
+    ],
+    "faltantes_obligatorias": [
+      "excel",
+      "python"
+    ],
+    "origen": "calculado con reglas de Python"
+  },
+  {
+    "id": 17,
+    "estudiante_id": 2,
+    "oferta_id": 3,
+    "estudiante": "Carlos Gómez",
+    "oferta": "Desarrollador Junior",
+    "score": 50.0,
+    "competencias_faltantes": [
+      "git",
+      "python"
+    ],
+    "faltantes_obligatorias": [
+      "python"
+    ],
+    "origen": "calculado con reglas de Python"
+  },
+  {
+    "id": 18,
+    "estudiante_id": 2,
+    "oferta_id": 4,
+    "estudiante": "Carlos Gómez",
+    "oferta": "Desarrollador Front end",
+    "score": 35.0,
+    "competencias_faltantes": [
+      "git",
+      "react"
+    ],
+    "faltantes_obligatorias": [
+      "react"
+    ],
+    "origen": "calculado con reglas de Python"
+  },
+  {
+    "id": 19,
+    "estudiante_id": 2,
+    "oferta_id": 2,
+    "estudiante": "Carlos Gómez",
+    "oferta": "Desarrollador Backend",
+    "score": 61.7,
+    "competencias_faltantes": [
+      "git",
+      "node.js"
+    ],
+    "faltantes_obligatorias": [
+      "node.js"
+    ],
+    "origen": "calculado con reglas de Python"
+  },
+  {
+    "id": 20,
+    "estudiante_id": 8,
+    "oferta_id": 5,
+    "estudiante": "Prueba UI 203719",
+    "oferta": "Dev Test",
+    "score": 100.0,
+    "competencias_faltantes": [],
+    "faltantes_obligatorias": [],
+    "origen": "calculado con reglas de Python"
   }
 ]

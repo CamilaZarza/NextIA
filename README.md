@@ -1,35 +1,32 @@
 # Nextia
- 
+
 Plataforma de vinculación y desarrollo profesional entre estudiantes, graduados y organizaciones que ofrecen oportunidades laborales.
 
----
-## 1. Objetivo
- 
-Nextia permite registrar perfiles de estudiantes (con sus competencias) y ofertas laborales (con sus requisitos), y **calcular un indicador de compatibilidad (scoring)** entre ambos mediante reglas explícitas programadas en Python. Además, identifica las **competencias que le faltan** al estudiante para cada oferta.
+Nextia registra perfiles y ofertas, calcula su compatibilidad mediante reglas explícitas en Python y puede generar recomendaciones de formación con IA. El cálculo del score es determinista; las recomendaciones generadas por IA requieren revisión humana.
 
-- **Resultados calculados por reglas de programación** (scoring y competencias faltantes), que llevan la etiqueta `calculado con reglas de Python`.
-- **Recomendaciones generadas por IA**, que se almacenan con la etiqueta `generado por IA (requiere revisión humana)`.
+## Funcionalidades
 
----
+- Registro, consulta y modificación de estudiantes, competencias y ofertas laborales.
+- Cálculo del score de compatibilidad y detección de competencias faltantes.
+- Consulta del diagnóstico técnico y del historial de compatibilidades.
+- Generación y consulta de recomendaciones personalizadas mediante Google Gemini y n8n.
+- Revisión humana de las recomendaciones: cada una nace `pendiente` y una persona la aprueba o la rechaza desde la pestaña **Recomendaciones IA**, dejando su nombre y un comentario.
+- Workflows de n8n para registrar estudiantes y ofertas, calcular compatibilidades y generar recomendaciones.
 
-## 2. Componentes
- 
+## Componentes y flujo de datos
+
 | Componente | Tecnología | Responsabilidad |
 |---|---|---|
-| Interfaz | Streamlit | Formularios, tablas y visualización de resultados. No calcula nada: solo consulta a la API. |
-| API | FastAPI | Valida datos, aplica la lógica de negocio, guarda y consulta información. |
-| Lógica | Python | Cálculo del scoring y detección de competencias faltantes. |
-| Persistencia | Archivos JSON | Almacenamiento de estudiantes, ofertas, resultados y recomendaciones. |
-| Automatización | n8n | Webhooks, validaciones, llamadas a FastAPI y generación de recomendaciones con IA. |
-| IA | Google Gemini | Genera recomendaciones a partir de los resultados calculados por Nextia. |
-
----
-
-### Arquitectura
+| Interfaz | Streamlit | Formularios, diagnósticos, recomendaciones y tablas. Se comunica con FastAPI y con los webhooks de n8n. |
+| API | FastAPI | Valida datos, aplica la lógica de negocio y guarda y consulta información. |
+| Lógica | Python | Calcula el score y detecta competencias faltantes. |
+| Persistencia | Archivos JSON | Almacena estudiantes, ofertas, resultados y recomendaciones en `data/`. |
+| Automatización | n8n | Expone webhooks, llama a FastAPI y coordina la generación de recomendaciones. |
+| IA | Google Gemini | Genera recomendaciones a partir de resultados calculados por Nextia. |
 
 ```mermaid
 flowchart LR
-    ST["Streamlit :8501"] -- "webhooks: altas, compatibilidad, IA" --> N8N["n8n :5678 (Docker)"]
+    ST["Streamlit :8501"] -- "webhooks: altas, compatibilidad, IA" --> N8N["n8n :5678"]
     ST -- "consultas, modificaciones, revisión" --> API["FastAPI :8000"]
     N8N -- "host.docker.internal:8000" --> API
     N8N -- HTTPS --> GEM["Google Gemini"]
@@ -39,81 +36,159 @@ flowchart LR
 
 El diagrama completo, los puertos, la tabla de comunicación entre componentes y el recorrido del proceso principal están en [`docs/arquitectura.md`](docs/arquitectura.md).
 
-## 3. Workflows de n8n
+## Requisitos
 
-El proyecto incluye cuatro workflows exportados o disponibles en la carpeta `n8n/`:
+Para ejecutar todo el sistema con Docker:
 
-| Workflow | Archivo | Responsabilidad | Decisión |
-|---|---|---|---|
-| Alta automatizada de estudiantes | `n8n/alta-estudiantes.json` | Recibe los datos de un estudiante y los registra mediante FastAPI. | Valida que nombre, carrera y competencias estén presentes. |
-| Compatibilidad automática | `n8n/compatibilidad-automatica.json` | Recibe un estudiante y una oferta, calcula su compatibilidad y guarda el resultado. | Valida que ambos IDs estén presentes. |
-| Recomendaciones con IA | `n8n/recomendaciones-ia.json` | Obtiene un resultado, consulta Gemini y guarda una recomendación en la API. | Verifica que el resultado solicitado exista. |
-| Alta automatizada de ofertas | `n8n/alta-ofertas.json` | Recibe los datos de una oferta y los registra mediante FastAPI. | Valida que título, empresa y requisitos obligatorios estén presentes. |
+- Git
+- Docker con Docker Compose (en Windows, Docker Desktop)
+- Una API key gratuita de Google Gemini, que se obtiene en https://aistudio.google.com/apikey con una cuenta de Google. Solo es necesaria para el workflow de recomendaciones con IA.
 
-Todos los workflows pueden comunicarse con FastAPI mediante `http://host.docker.internal:8000`, que permite al contenedor de n8n acceder al servicio ejecutado en el equipo anfitrión.
+Para ejecutar FastAPI y Streamlit localmente:
 
-Los workflows incluidos tienen respuestas HTTP 400 o 404 para solicitudes inválidas y deben exportarse/importarse nuevamente si se realizan cambios posteriores en n8n.
+- Python 3.10 o superior
+- Git
+- Dependencias de `requirements.txt`
 
-### 3.1 Iniciar n8n
+## Instalación
 
-Desde la raíz del proyecto:
+Clona el repositorio y entra en su directorio:
+
+```bash
+git clone <URL_DEL_REPOSITORIO>
+cd nextia
+```
+
+Para la ejecucion local, crea y activa un entorno virtual e instala las dependencias:
 
 ```powershell
+python -m venv .venv
+# Windows PowerShell
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+En macOS o Linux, activa el entorno con:
+
+```bash
+source .venv/bin/activate
+```
+
+## Ejecución
+
+### Opción 1: sistema completo con Docker Compose
+
+Desde la raiz del proyecto, inicia FastAPI, Streamlit y n8n:
+
+```bash
+docker compose up -d
+```
+
+Accesos locales:
+
+| Servicio | URL |
+|---|---|
+| Streamlit | http://localhost:8501 |
+| FastAPI y documentacion Swagger | http://localhost:8000/docs |
+| n8n | http://localhost:5678 |
+
+En esta configuración, Streamlit accede a FastAPI mediante `http://api:8000` y a n8n mediante `http://n8n:5678/webhook`. n8n accede a FastAPI mediante `http://host.docker.internal:8000`. Los datos JSON se conservan en `data/` y n8n conserva su estado en un volumen de Docker.
+
+Comandos utiles:
+
+```bash
+docker compose ps
+docker compose logs -f
+docker compose logs -f api
+docker compose logs -f streamlit
+docker compose logs -f n8n
+docker compose restart
+docker compose down
+```
+
+### Opción 2: desarrollo local con n8n en Docker
+
+Inicia solamente n8n desde la raiz del proyecto:
+
+```bash
 docker compose -f n8n/compose.yaml up -d
 ```
 
-n8n queda disponible en:
+En terminales separadas, activa el entorno virtual en cada terminal y ejecuta la API y la interfaz:
 
-```text
-http://localhost:5678
+```powershell
+# Terminal 1: API
+.\.venv\Scripts\Activate.ps1
+python -m uvicorn app.main:app --reload
 ```
 
-Para importar los workflows:
+```powershell
+# Terminal 2: Streamlit
+.\.venv\Scripts\Activate.ps1
+python -m streamlit run interfaz/streamlit_app.py
+```
 
-1. Abrir n8n en el navegador.
-2. Seleccionar **Workflows > Import from File**.
-3. Importar cada archivo de la carpeta `n8n/`.
-4. Guardar y activar el workflow correspondiente.
-5. Configurar la credencial de Gemini para el workflow de recomendaciones (ver abajo).
+La API queda disponible en http://127.0.0.1:8000 y Streamlit en http://localhost:8501. La documentación de la API se encuentra en `/docs`.
 
-Los archivos exportados están configurados como activos (`active: true`). Igualmente, deben activarse desde la interfaz de n8n si esta muestra el workflow como inactivo después de importarlo o reiniciar el entorno.
+Si n8n no logra conectarse con la API, iníciala con `--host 0.0.0.0` para que acepte conexiones desde el contenedor.
 
-**Configurar la credencial de Gemini** (una sola vez, porque queda guardada en el volumen `n8n_data`):
+Por defecto, Streamlit busca la API en `http://127.0.0.1:8000` y n8n en `http://127.0.0.1:5678/webhook`. Si algún servicio corre en otro puerto, cambia las direcciones con las variables `API_URL` y `N8N_URL` antes de iniciar Streamlit:
 
-1. Abrir el workflow **Recomendaciones IA**.
-2. Abrir el nodo **Google Gemini Chat Model** → *Credential* → *Create new credential*.
-3. Pegar la API key en *API Key*, dejar el *Host* por defecto y guardar.
-4. Guardar y publicar el workflow.
+```powershell
+$env:API_URL = "http://127.0.0.1:8001"
+$env:N8N_URL = "http://127.0.0.1:5678/webhook"
+```
 
-La API key nunca se sube al repositorio: n8n la guarda cifrada en su volumen local y los workflows exportados solo guardan una referencia a la credencial.
+En macOS o Linux, activa el entorno en cada terminal con `source .venv/bin/activate`.
 
-**Configuración Docker** (`n8n/compose.yaml`):
+## Workflows de n8n
+
+Los cuatro workflows se encuentran en `n8n/`:
+
+| Workflow | Archivo | Responsabilidad |
+|---|---|---|
+| Alta automatizada de estudiantes | `n8n/alta-estudiantes.json` | Valida y registra un estudiante mediante FastAPI. |
+| Compatibilidad automática | `n8n/compatibilidad-automatica.json` | Valida los identificadores, calcula la compatibilidad y guarda el resultado. |
+| Recomendaciones con IA | `n8n/recomendaciones-ia.json` | Obtiene un resultado, consulta Gemini y guarda la recomendación. |
+| Alta automatizada de ofertas | `n8n/alta-ofertas.json` | Valida y registra una oferta mediante FastAPI. |
+
+Para usarlos:
+
+1. Inicia n8n con una de las opciones de ejecución anteriores.
+2. Abre http://localhost:5678 y selecciona **Workflows > Import from File**.
+3. Importa los archivos JSON desde `n8n/`.
+4. Guarda y **publica** cada workflow con **Publish**. Los webhooks usan la versión publicada: guardar no alcanza. Si n8n lo muestra inactivo después de importarlo o reiniciarlo, actívalo desde la interfaz.
+5. Configura la credencial de Gemini para el workflow de recomendaciones (ver abajo).
+
+**Configurar la credencial de Gemini** (una sola vez, porque queda guardada en el volumen de n8n):
+
+1. Abre el workflow **Recomendaciones IA**.
+2. Abre el nodo **Google Gemini Chat Model** y elige *Credential* → *Create new credential*.
+3. Pega la API key en *API Key*, deja el *Host* por defecto y guarda.
+4. **Publica** el workflow. Si no lo publicas, sigue usando la credencial del archivo importado y falla con `CredentialNotFoundError`.
+
+La API key nunca se sube al repositorio: n8n la guarda cifrada en su volumen y los workflows exportados solo guardan una referencia a la credencial.
+
+**Configuración de n8n en Docker** (igual en `compose.yaml` y en `n8n/compose.yaml`):
 
 | Elemento | Valor | Para qué |
 |---|---|---|
-| Imagen | `docker.n8n.io/n8nio/n8n:2.46.6` | Versión fija, para que todos usen el mismo n8n |
+| Imagen | `docker.n8n.io/n8nio/n8n:2.46.6` | Versión fija, para que todo el grupo use el mismo n8n |
 | Contenedor | `nextia-n8n` | Nombre para `docker logs nextia-n8n` o `docker exec` |
 | Puerto | `5678:5678` | Editor web y webhooks |
-| `extra_hosts` | `host.docker.internal:host-gateway` | Permite que n8n llegue a la API que corre en el equipo anfitrión |
+| `extra_hosts` | `host.docker.internal:host-gateway` | Permite que n8n llegue a la API publicada en el equipo anfitrión |
 | Volumen | `n8n_data:/home/node/.n8n` | Conserva workflows, credenciales y usuario entre reinicios |
 | Zona horaria | `America/Argentina/Buenos_Aires` | Fechas de ejecución correctas |
 
-Si se actualiza la versión de la imagen, hay que bajarla y recrear el contenedor:
+Las dos configuraciones usan el mismo nombre de contenedor, así que no pueden correr a la vez. Además, cada una tiene su propio volumen: los workflows y credenciales importados en una no aparecen en la otra.
 
-```powershell
-docker compose -f n8n/compose.yaml pull
-docker compose -f n8n/compose.yaml up -d
-```
+Si se actualiza la versión de la imagen, hay que descargarla y recrear el contenedor con `docker compose pull` y `docker compose up -d`.
 
-### 3.2 Alta automatizada de estudiantes
+Los workflows llaman a FastAPI mediante `http://host.docker.internal:8000`. Devuelven errores HTTP 400 o 404 para solicitudes inválidas. Si modificas un workflow en n8n, vuelve a exportarlo para actualizar el archivo versionado.
 
-Webhook configurado como:
+### Registrar un estudiante
 
-```text
-POST /webhook/registrar-estudiante
-```
-
-Ejemplo de solicitud:
+Webhook: `POST /webhook/registrar-estudiante`
 
 ```json
 {
@@ -123,7 +198,7 @@ Ejemplo de solicitud:
 }
 ```
 
-El nodo `IF` rechaza solicitudes incompletas. Si los datos son válidos, n8n llama a `POST /estudiantes` y devuelve al cliente el estudiante creado por FastAPI.
+El workflow valida que nombre, carrera y competencias estén presentes. Si la solicitud es válida, llama a `POST /estudiantes` y devuelve el estudiante creado.
 
 Prueba desde PowerShell:
 
@@ -141,15 +216,9 @@ Invoke-RestMethod `
   -Body $body
 ```
 
-### 3.3 Compatibilidad automática
+### Calcular compatibilidad
 
-Webhook configurado como:
-
-```text
-POST /webhook/calcular-compatibilidad
-```
-
-Ejemplo de solicitud:
+Webhook: `POST /webhook/calcular-compatibilidad`
 
 ```json
 {
@@ -158,7 +227,7 @@ Ejemplo de solicitud:
 }
 ```
 
-El workflow llama a `POST /compatibilidad`. FastAPI calcula el score, identifica las competencias faltantes y guarda el resultado.
+El workflow valida que ambos identificadores estén presentes y llama a `POST /compatibilidad`. FastAPI calcula el score, identifica las competencias faltantes y guarda el resultado.
 
 Prueba desde PowerShell:
 
@@ -175,15 +244,9 @@ Invoke-RestMethod `
   -Body $body
 ```
 
-### 3.4 Recomendaciones con IA
+### Generar una recomendación con IA
 
-Webhook configurado como:
-
-```text
-POST /webhook/generar-recomendacion
-```
-
-Ejemplo de solicitud:
+Webhook: `POST /webhook/generar-recomendacion`
 
 ```json
 {
@@ -191,7 +254,7 @@ Ejemplo de solicitud:
 }
 ```
 
-El workflow obtiene el resultado mediante `GET /resultados/{id}`. Un nodo `IF` verifica que el resultado exista; en ese caso, la rama verdadera envía el score y las competencias faltantes a Google Gemini mediante un `Basic LLM Chain`. La respuesta generada se guarda con `POST /recomendaciones` y `modelo: "gemini"`.
+El workflow obtiene el resultado mediante `GET /resultados/{id}` y verifica que exista. Luego envía el score y las competencias faltantes a Google Gemini mediante un `Basic LLM Chain` y guarda la respuesta con `POST /recomendaciones` y `modelo: "gemini"`.
 
 Prueba desde PowerShell:
 
@@ -207,17 +270,11 @@ Invoke-RestMethod `
   -Body $body
 ```
 
-La recomendación se identifica en la API como `generado por IA (requiere revisión humana)`. El proyecto no guarda la API key dentro de los archivos exportados; debe configurarse como credencial privada en n8n.
+La API identifica estas respuestas como `generado por IA (requiere revisión humana)`.
 
-### 3.5 Alta automatizada de ofertas
+### Registrar una oferta
 
-Webhook configurado como:
-
-```text
-POST /webhook/registrar-oferta
-```
-
-Ejemplo de solicitud:
+Webhook: `POST /webhook/registrar-oferta`
 
 ```json
 {
@@ -228,21 +285,12 @@ Ejemplo de solicitud:
 }
 ```
 
-El flujo utiliza los siguientes nodos:
+El workflow verifica que título, empresa y al menos un requisito obligatorio estén presentes. Si son válidos, llama a `POST /ofertas`; si no, responde con estado 400:
 
-```text
-Webhook
-  → IF
-  ├─ True → HTTP Request: POST /ofertas → Respond to Webhook
-  └─ False → Respond to Webhook con error 400
-```
-
-El nodo `IF` verifica que `titulo`, `empresa` y `requisitos_obligatorios` estén presentes y que la lista de requisitos obligatorios no esté vacía.
-
-En la rama verdadera, n8n llama a `POST /ofertas` mediante:
-
-```text
-http://host.docker.internal:8000/ofertas
+```json
+{
+  "error": "Debes enviar titulo, empresa y al menos un requisito obligatorio"
+}
 ```
 
 Prueba desde PowerShell:
@@ -262,144 +310,45 @@ Invoke-RestMethod `
   -Body $body
 ```
 
-Si la solicitud tiene datos incompletos, el workflow responde con estado `400` y el mensaje:
+## Cálculo de compatibilidad
 
-```json
-{
-  "error": "Debes enviar titulo, empresa y al menos un requisito obligatorio"
-}
-```
+El score va de 0 a 100 y combina requisitos obligatorios y deseables:
 
-## 4. Requisitos
- 
-- Python 3.10 o superior
-- Git
-- Docker Desktop (con Docker Compose), para ejecutar n8n
-- Una API key gratuita de Google Gemini, que se obtiene en https://aistudio.google.com/apikey con una cuenta de Google. Solo hace falta para el workflow de recomendaciones con IA.
-- Librerías: `fastapi`, `uvicorn`, `pydantic`, `streamlit`, `requests` (ver `requirements.txt`)
-## 5. Instalación
- 
-```bash
-# 1. Clonar el repositorio
-git clone <URL_DEL_REPOSITORIO>
-cd nextia
- 
-# 2. Crear y activar el entorno virtual
-python -m venv .venv
-# Windows PowerShell:
-.venv\Scripts\Activate.ps1
-# Mac / Linux:
-source .venv/bin/activate
- 
-# 3. Instalar dependencias
-pip install -r requirements.txt
-```
- 
-## 6. Ejecución
- 
-Se necesitan **tres terminales abiertas desde la raíz del proyecto**.
- 
-### Terminal 1: API FastAPI
- 
-```bash
-# Activar el entorno virtual solo en Windows PowerShell
-.\.venv\Scripts\Activate.ps1
-
-python -m uvicorn app.main:app --reload
-```
- 
-- API: http://127.0.0.1:8000
-- Documentación interactiva (Swagger): http://127.0.0.1:8000/docs
-
-### Terminal 2: interfaz Streamlit
-
-```bash
-# Activar el entorno virtual solo en Windows PowerShell
-.\.venv\Scripts\Activate.ps1
-
-python -m streamlit run interfaz/streamlit_app.py
-```
-
-- Interfaz: http://localhost:8501
-
-Por defecto la interfaz busca la API en `http://127.0.0.1:8000` y n8n en `http://127.0.0.1:5678/webhook`. Si alguno corre en otro puerto, se puede cambiar con variables de entorno antes de iniciar Streamlit:
-
-```powershell
-$env:NEXTIA_API_URL = "http://127.0.0.1:8001"
-$env:NEXTIA_N8N_URL = "http://127.0.0.1:5678/webhook"
-```
-
-### Terminal 3: n8n con Docker
-
-```bash
-docker compose -f n8n/compose.yaml up -d
-```
-
-- n8n: http://localhost:5678
-
-Comandos útiles:
-  
-```bash
-# Detener n8n
-docker compose -f n8n/compose.yaml down
-
-# Reiniciar n8n
-docker compose -f n8n/compose.yaml restart
-
-# Consultar el estado de los contenedores
-docker compose -f n8n/compose.yaml ps
-```
- 
-Para detener FastAPI o Streamlit, presionar `Ctrl + C` en la terminal correspondiente. Para detener n8n, utilizar el comando `docker compose -f n8n/compose.yaml down`.
- 
-> Si la API debe ser accesible desde otro equipo o contenedor de la red local, iniciarla con `--host 0.0.0.0`.
- 
-## 7. Funcionalidades principales
- 
-La interfaz tiene cinco pestañas:
- 
-1. **Estudiantes**: alta de perfiles, listado y modificación de competencias.
-2. **Ofertas**: alta de ofertas con requisitos obligatorios y deseables, listado y modificación.
-3. **Compatibilidad**: se elige un estudiante y una oferta y se calcula el score, con barra de progreso y competencias faltantes.
-4. **Resultados**: historial de compatibilidades calculadas y generación de recomendaciones con IA.
-5. **Recomendaciones IA**: historial de recomendaciones generadas, con filtros por resultado y por estado, y **revisión humana**: cada recomendación nace `pendiente` y una persona la aprueba o la rechaza dejando su nombre y un comentario.
-### Cómo se calcula el score
- 
-El puntaje va de 0 a 100 y se compone de dos partes:
- 
 | Criterio | Puntos máximos | Cálculo |
-|---|---|---|
-| Requisitos obligatorios | 70 | `70 × (obligatorios cumplidos / obligatorios totales)` |
-| Requisitos deseables | 30 | `30 × (deseables cumplidos / deseables totales)` |
- 
+|---|---:|---|
+| Requisitos obligatorios | 70 | `70 x (obligatorios cumplidos / obligatorios totales)` |
+| Requisitos deseables | 30 | `30 x (deseables cumplidos / deseables totales)` |
+
 - Las competencias se comparan sin distinguir mayúsculas ni espacios sobrantes (`"Python "` equivale a `"python"`).
 - Si la oferta no tiene requisitos deseables, se otorgan los 30 puntos completos.
 - Una oferta sin requisitos obligatorios se rechaza con error.
-- Se informan las competencias faltantes, diferenciando las obligatorias.
-**Ejemplo:** estudiante con `Python, Git, Excel` frente a una oferta que exige `python, sql, excel` (obligatorios) y `power bi, git` (deseables):
- 
-- Obligatorios: 2 de 3 → 46,7 puntos
-- Deseables: 1 de 2 → 15 puntos
-- **Score: 61,7** · Faltantes: `power bi`, `sql`
-## 8. Endpoints de la API
- 
+- Las competencias faltantes se informan diferenciando las obligatorias.
+
+Ejemplo: un estudiante tiene `Python, Git, Excel`; la oferta requiere `python, sql, excel` como obligatorias y `power bi, git` como deseables:
+
+- Obligatorios: 2 de 3 = 46,7 puntos.
+- Deseables: 1 de 2 = 15 puntos.
+- **Score: 61,7**. Faltan `power bi` y `sql`.
+
+## Endpoints de la API
+
 | Método | Ruta | Descripción | Respuestas |
 |---|---|---|---|
-| GET | `/status` | Verifica que la API esté activa | 200 |
-| POST | `/estudiantes` | Registra un estudiante | 201, 422 |
-| GET | `/estudiantes` | Lista los estudiantes | 200 |
-| PUT | `/estudiantes/{id}` | Modifica un estudiante | 200, 404, 422 |
-| POST | `/ofertas` | Registra una oferta | 201, 422 |
-| GET | `/ofertas` | Lista las ofertas | 200 |
-| PUT | `/ofertas/{id}` | Modifica una oferta | 200, 404, 422 |
-| POST | `/compatibilidad` | Calcula y guarda el scoring de un estudiante frente a una oferta | 201, 400, 404, 422 |
-| GET | `/resultados` | Lista los resultados (filtro opcional `?estudiante_id=`) | 200 |
-| GET | `/resultados/{id}` | Obtiene un resultado puntual | 200, 404 |
-| POST | `/recomendaciones` | Guarda una recomendación asociada a un resultado (queda `pendiente`) | 201, 404, 422 |
-| GET | `/recomendaciones` | Lista recomendaciones (filtros opcionales `?resultado_id=` y `?estado=`) | 200 |
-| PUT | `/recomendaciones/{id}/revision` | Una persona aprueba o rechaza la recomendación | 200, 404, 422 |
+| GET | `/status` | Verifica que la API esté activa. | 200 |
+| POST | `/estudiantes` | Registra un estudiante. | 201, 422 |
+| GET | `/estudiantes` | Lista los estudiantes. | 200 |
+| PUT | `/estudiantes/{id}` | Modifica un estudiante. | 200, 404, 422 |
+| POST | `/ofertas` | Registra una oferta. | 201, 422 |
+| GET | `/ofertas` | Lista las ofertas. | 200 |
+| PUT | `/ofertas/{id}` | Modifica una oferta. | 200, 404, 422 |
+| POST | `/compatibilidad` | Calcula y guarda la compatibilidad. | 201, 400, 404, 422 |
+| GET | `/resultados` | Lista resultados; permite `?estudiante_id=`. | 200 |
+| GET | `/resultados/{id}` | Obtiene un resultado. | 200, 404 |
+| POST | `/recomendaciones` | Guarda una recomendación asociada a un resultado (queda `pendiente`). | 201, 404, 422 |
+| GET | `/recomendaciones` | Lista recomendaciones; permite `?resultado_id=` y `?estado=`. | 200 |
+| PUT | `/recomendaciones/{id}/revision` | Una persona aprueba o rechaza la recomendación. | 200, 404, 422 |
 
-## 9. Integración de inteligencia artificial en el sistema
+## Integración de inteligencia artificial en el sistema
 
 ### Qué hace la IA
 
@@ -436,14 +385,16 @@ Alternativa: **Ollama con un modelo local** (por ejemplo Llama o Mistral). Tiene
 5. **Revisión humana obligatoria**: cada recomendación nace `pendiente`. Una persona la aprueba o la rechaza desde la pestaña **Recomendaciones IA**, y queda registrado quién la revisó, cuándo y con qué comentario (`PUT /recomendaciones/{id}/revision`).
 6. **Independencia**: el scoring no depende de la IA. Si Gemini no está disponible, el registro, el cálculo de compatibilidad y la consulta de resultados siguen funcionando.
 
-## 10. Uso de inteligencia artificial en el desarrollo
+## Bitácora de uso de IA en el desarrollo
 
-Durante el desarrollo se utilizó GitHub Copilot como herramienta de asistencia para completar tareas técnicas, siempre con revisión, prueba y corrección por parte del grupo. Las principales aplicaciones fueron:
+Durante el desarrollo se utilizó GitHub Copilot como asistencia para analizar, implementar y revisar partes del sistema. La bitácora registra aportes concretos y cómo el grupo verificó las propuestas:
 
-| Uso | Cómo colaboró la IA | Verificación realizada |
-|---|---|---|
-| Validación de errores en workflows de n8n | Ayudó a revisar la configuración de los nodos, las conexiones entre pasos y la detección de errores en las validaciones y respuestas HTTP. | Se importaron los workflows, se probaron rutas válidas y inválidas y se verificaron las respuestas del sistema. |
-| Elaboración de la interfaz con Streamlit | Apoyó en la organización de pestañas, formularios, tablas, mensajes de estado y la comunicación con FastAPI y n8n. | Se probaron manualmente los formularios, las llamadas HTTP, la actualización de datos y los casos de error desde la interfaz. |
+| Área | Aporte concreto con asistencia de IA | Decisión, corrección o revisión del grupo | Verificación |
+|---|---|---|---|
+| Lógica de compatibilidad | Se revisó la normalización de competencias y el cálculo separado de requisitos obligatorios y deseables, incluyendo la lista de competencias faltantes. | Se mantuvo el score como cálculo determinista en Python y separado de las recomendaciones generadas por IA. | Se contrastaron ejemplos de competencias coincidentes y faltantes con el score esperado. |
+| Persistencia JSON | Se organizó la lectura, escritura y asignación de identificadores en funciones reutilizables para estudiantes, ofertas, resultados y recomendaciones. | Se eligieron archivos JSON como persistencia sencilla para el alcance del prototipo y los datos de demostración. | Se verificó que los registros guardados pudieran volver a consultarse desde la API y aparecer en la interfaz. |
+| Validación y manejo de errores | Se revisaron las validaciones de entrada, las respuestas HTTP de FastAPI y las respuestas de error de los workflows de n8n. | Se contemplaron datos incompletos, identificadores inexistentes y errores de conexión; la interfaz muestra mensajes en lugar de dejar la operación sin explicación. | Se probaron solicitudes inválidas y casos de error durante la integración. |
+| Integración Streamlit, FastAPI y n8n | Se revisó el recorrido desde los formularios hasta los webhooks, la API y el almacenamiento, además de la consulta de resultados y recomendaciones. | Se conservaron identificadores de origen para distinguir el score calculado por reglas de Python de las recomendaciones generadas por Gemini. | Se comprobó el flujo de alta, cálculo y consulta desde la interfaz, además de las respuestas de los workflows. |
+| Interfaz de resultados | Se recibió asistencia para organizar la vista de diagnóstico, competencias faltantes, recomendaciones de IA e historial. | El grupo revisó los textos y mantuvo visible que la recomendación automática requiere revisión humana. | Se comprobó la visualización con resultados que incluyen brechas y recomendaciones asociadas. |
 
-La IA no reemplazó la decisión ni la responsabilidad del grupo sobre el funcionamiento final. Cada cambio fue probado, ajustado y integrado al proyecto antes de considerarlo correcto. Además, la IA integrada al sistema mediante Gemini genera recomendaciones de formación; el scoring corresponde a una lógica determinista desarrollada en Python y puede funcionar independientemente.
- 
+El grupo revisó y corrigió las propuestas antes de incorporarlas al proyecto. La IA no reemplazó las pruebas ni la responsabilidad del equipo. Las verificaciones descritas corresponden a pruebas manuales de integración; no implican que exista una suite automatizada de tests.
