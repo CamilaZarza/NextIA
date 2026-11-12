@@ -4,6 +4,18 @@ Plataforma de vinculación y desarrollo profesional entre estudiantes, graduados
 
 Nextia registra perfiles y ofertas, calcula su compatibilidad mediante reglas explícitas en Python y puede generar recomendaciones de formación con IA. El cálculo del score es determinista; las recomendaciones generadas por IA requieren revisión humana.
 
+## Repositorio y equipo
+
+Repositorio: [github.com/CamilaZarza/NextIA](https://github.com/CamilaZarza/NextIA)
+
+| Integrante |
+|---|
+| Camila Zarza |
+| Elmer Baltazar Llusco |
+| Federico Colombo |
+| Juan Pablo Dongo Huaman |
+| Tomás Ezequiel Nobile |
+
 ## Funcionalidades
 
 - Registro, consulta y modificación de estudiantes, competencias y ofertas laborales.
